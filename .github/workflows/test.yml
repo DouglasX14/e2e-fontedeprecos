@@ -1,0 +1,21 @@
+name: Install
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn playwright install --with-deps chromium
+      # Full E2E needs a running frontend-fp (FRONTEND_DIR / BASE_URL).
+      # Run locally: yarn test:e2e:cotacao-v2:stable
