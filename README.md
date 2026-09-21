@@ -21,11 +21,23 @@ yarn qa:smoke   # rápido (P0)
 yarn qa         # suíte cotação v2 completa
 ```
 
-4. Se falhar: `yarn test:e2e:report` e envie print ou zip de `playwright-report/`.
+4. Se falhar: o script gera `playwright-report-qa.zip` — **envie esse zip**.  
+   Abrir HTML local: `yarn qa:report`.
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
 Front em outro path: `FRONTEND_DIR=/caminho/frontend-fp yarn qa`.  
 Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
+
+### Falhas comuns
+
+| Sintoma | O que fazer |
+|---------|-------------|
+| `Executable doesn't exist` | Re-rodar `yarn qa` (instala Chromium) |
+| Timeout / `Loading...` | Nuxt no ar; conferir `BASE_URL` / `FRONTEND_DIR` |
+| Pin diverge | `git checkout` do commit em `frontend.pin` |
+| Node errado | `nvm use` (`.nvmrc` = 20) |
+| Testid / seletor | `INJECT_TESTIDS=1` (já default do `qa`) |
+| App não sobe | `yarn` no `frontend-fp`; porta 3010 livre |
 
 ---
 
@@ -73,6 +85,7 @@ yarn test:e2e:cotacao-v2:stable
 |---------|-----|
 | `yarn qa` / `yarn qa:full` | Kit QA: install + Chromium + suíte cotação v2 (inject, workers=1) |
 | `yarn qa:smoke` | Kit QA rápido (detalhes core + item v2) |
+| `yarn qa:report` | Abre o HTML report (`playwright-report/`) |
 | `yarn test:e2e` | Todos os specs em `playwright/e2e/` |
 | `yarn test:e2e:cotacao-v2` | Suíte `cotacao-*.spec.ts` |
 | `yarn test:e2e:cotacao-v2:stable` | Idem, `--workers=1` (recomendado local) |
@@ -160,12 +173,15 @@ TEST_USER_PASSWORD=secret
 
 ## Troubleshooting
 
+Para QA, ver também **Falhas comuns** no topo. Em falha, `yarn qa` gera `playwright-report-qa.zip`.
+
 | Sintoma | Ação |
 |---------|------|
-| `Executable doesn't exist` | `yarn test:e2e:install` |
-| Timeout / `Loading...` | Use `:stable` ou suba o Nuxt antes; confira `BASE_URL` |
-| `webServer` não sobe | Defina `FRONTEND_DIR` absoluto/relativo válido com `yarn` no app |
+| `Executable doesn't exist` | `yarn qa` ou `yarn test:e2e:install` |
+| Timeout / `Loading...` | Use `:stable` / `yarn qa`; suba o Nuxt; confira `BASE_URL` |
+| `webServer` não sobe | Defina `FRONTEND_DIR` válido com `yarn` no app |
 | App não encontrado | Sem `FRONTEND_DIR`, garanta Nuxt em `BASE_URL` |
+| Pin diverge | Checkout do commit em `frontend.pin` (ou `STRICT_FRONTEND_PIN=1`) |
 
 ## CI
 

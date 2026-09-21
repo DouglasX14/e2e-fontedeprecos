@@ -145,6 +145,38 @@ set -e
 
 echo ""
 echo "==> Exit code: $EXIT"
-echo "    Relatório HTML: yarn test:e2e:report"
-echo "    (pasta playwright-report/ — envie print ou zip se falhar)"
+
+if [[ "$EXIT" -eq 0 ]]; then
+  echo "    OK — suíte passou."
+  echo "    Relatório (opcional): yarn qa:report"
+  exit 0
+fi
+
+echo "    FALHOU — veja o checklist e o report abaixo."
+echo ""
+echo "--- Falhas comuns ---"
+echo "  Executable doesn't exist  →  re-rode yarn qa (instala Chromium)"
+echo "  Timeout / Loading...      →  Nuxt no ar? BASE_URL / FRONTEND_DIR ok?"
+echo "  Pin diverge               →  git checkout do commit em frontend.pin"
+echo "  Node errado               →  nvm use  (.nvmrc = 20)"
+echo "  Testid / seletor          →  INJECT_TESTIDS=1 (já é default do qa)"
+echo "  App não sobe              →  yarn no frontend-fp; porta 3010 livre"
+echo ""
+
+ZIP="$ROOT/playwright-report-qa.zip"
+if [[ -d "$ROOT/playwright-report" ]]; then
+  rm -f "$ZIP"
+  if command -v zip >/dev/null 2>&1; then
+    (cd "$ROOT" && zip -qr "$ZIP" playwright-report)
+  else
+    # fallback sem zip(1)
+    (cd "$ROOT" && tar -czf "${ZIP%.zip}.tgz" playwright-report)
+    ZIP="${ZIP%.zip}.tgz"
+  fi
+  echo "    Report empacotado: $ZIP"
+  echo "    Envie este arquivo ao time (ou print do HTML)."
+else
+  echo "    Aviso: pasta playwright-report/ não encontrada — sem zip."
+fi
+echo "    Abrir HTML local: yarn qa:report"
 exit "$EXIT"

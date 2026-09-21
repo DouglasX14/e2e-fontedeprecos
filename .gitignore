@@ -6,6 +6,8 @@ node_modules/
 # Playwright
 /test-results/
 /playwright-report/
+/playwright-report-qa.zip
+/playwright-report-qa.tgz
 /blob-report/
 /playwright/.cache/
 /playwright/auth-sessions/*
