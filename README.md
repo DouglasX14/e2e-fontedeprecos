@@ -2,6 +2,29 @@
 
 Suíte **Playwright E2E** da cotação v2 do Fonte de Preços (Item, Detalhes, satellites).
 
+## Para QA / suporte
+
+Branch: [`feat/inject-testids-on-demand`](https://github.com/DouglasX14/e2e-fontedeprecos/tree/feat/inject-testids-on-demand)
+
+1. Clone este repo **ao lado** do `frontend-fp` (mesmo diretório pai).
+2. Node 18+ e Yarn instalados.
+3. Rode:
+
+```bash
+cd e2e-fontedeprecos
+git checkout feat/inject-testids-on-demand
+yarn qa:smoke   # rápido (P0)
+# ou
+yarn qa         # suíte cotação v2 completa
+```
+
+4. Se falhar: `yarn test:e2e:report` e envie print ou zip de `playwright-report/`.
+
+O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
+Front em outro path: `FRONTEND_DIR=/caminho/frontend-fp yarn qa`.
+
+---
+
 Repo independente do app. Os testes sobem contra um checkout local do [`frontend-fp`](https://github.com/promaxima-dynamics/frontend-fp) (Nuxt).
 
 ## Pré-requisitos
@@ -44,9 +67,12 @@ yarn test:e2e:cotacao-v2:stable
 
 | Comando | Uso |
 |---------|-----|
+| `yarn qa` / `yarn qa:full` | Kit QA: install + Chromium + suíte cotação v2 (inject, workers=1) |
+| `yarn qa:smoke` | Kit QA rápido (detalhes core + item v2) |
 | `yarn test:e2e` | Todos os specs em `playwright/e2e/` |
 | `yarn test:e2e:cotacao-v2` | Suíte `cotacao-*.spec.ts` |
 | `yarn test:e2e:cotacao-v2:stable` | Idem, `--workers=1` (recomendado local) |
+| `yarn test:e2e:cotacao-v2:inject` | Idem com `INJECT_TESTIDS=1` |
 | `yarn test:e2e:ui` | Playwright UI mode |
 | `yarn test:e2e:headed` | Browser visível |
 | `yarn test:e2e:report` | Abre o HTML report |
