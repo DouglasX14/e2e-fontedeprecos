@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "Playwright E2E suite for Fonte de Preços cotação v2 (Item, Detalhes, satellites)",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
+    "qa": "bash scripts/qa.sh",
+    "qa:smoke": "bash scripts/qa.sh smoke",
+    "qa:full": "bash scripts/qa.sh full",
+    "qa:report": "playwright show-report playwright-report",
     "test:e2e": "playwright test",
     "test:e2e:cotacao-v2": "playwright test playwright/e2e/cotacao-*.spec.ts",
     "test:e2e:cotacao-v2:stable": "playwright test playwright/e2e/cotacao-*.spec.ts --workers=1",
