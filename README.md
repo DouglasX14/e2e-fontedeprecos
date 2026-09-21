@@ -32,6 +32,7 @@ Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 
 | Sintoma | O que fazer |
 |---------|-------------|
+| `Cannot find module 'dotenv'` | `git pull` (já no package.json) ou `yarn add -D dotenv` |
 | `Executable doesn't exist` | Re-rodar `yarn qa` (instala Chromium) |
 | Timeout / `Loading...` | Nuxt no ar; conferir `BASE_URL` / `FRONTEND_DIR` |
 | Pin diverge | `git checkout` do commit em `frontend.pin` |
@@ -177,6 +178,7 @@ Para QA, ver também **Falhas comuns** no topo. Em falha, `yarn qa` gera `playwr
 
 | Sintoma | Ação |
 |---------|------|
+| `Cannot find module 'dotenv'` | `git pull` ou `yarn add -D dotenv` |
 | `Executable doesn't exist` | `yarn qa` ou `yarn test:e2e:install` |
 | Timeout / `Loading...` | Use `:stable` / `yarn qa`; suba o Nuxt; confira `BASE_URL` |
 | `webServer` não sobe | Defina `FRONTEND_DIR` válido com `yarn` no app |

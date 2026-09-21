@@ -155,6 +155,7 @@ fi
 echo "    FALHOU — veja o checklist e o report abaixo."
 echo ""
 echo "--- Falhas comuns ---"
+echo "  Cannot find module 'dotenv' →  git pull (dotenv no package.json) ou yarn add -D dotenv"
 echo "  Executable doesn't exist  →  re-rode yarn qa (instala Chromium)"
 echo "  Timeout / Loading...      →  Nuxt no ar? BASE_URL / FRONTEND_DIR ok?"
 echo "  Pin diverge               →  git checkout do commit em frontend.pin"
