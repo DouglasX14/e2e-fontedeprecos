@@ -1,6 +1,7 @@
 import { test, expect, log } from '../support/merged-fixtures'
 import {
   gotoDetalhesPage,
+  openAcoesMenu,
   stubDetalhesPageApis,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
@@ -18,7 +19,7 @@ test.describe('Cotação Detalhes v2 — navegação Ações', () => {
     await stubs.getItensCall
     await waitForDetalhesPageReady(page)
 
-    await page.getByTestId('detalhes-acoes-menu').click()
+    await openAcoesMenu(page)
     const anexar = page.getByTestId('detalhes-acao-anexar-documentos')
     await expect(anexar).toBeVisible()
     await Promise.all([
@@ -39,7 +40,7 @@ test.describe('Cotação Detalhes v2 — navegação Ações', () => {
     await stubs.getItensCall
     await waitForDetalhesPageReady(page)
 
-    await page.getByTestId('detalhes-acoes-menu').click()
+    await openAcoesMenu(page)
     const colaboradores = page.getByTestId('detalhes-acao-colaboradores')
     await expect(colaboradores).toBeVisible()
     await Promise.all([
@@ -60,7 +61,7 @@ test.describe('Cotação Detalhes v2 — navegação Ações', () => {
     await stubs.getItensCall
     await waitForDetalhesPageReady(page)
 
-    await page.getByTestId('detalhes-acoes-menu').click()
+    await openAcoesMenu(page)
     const direta = page.getByTestId('detalhes-acao-cotacao-direta')
     await expect(direta).toBeVisible()
     await Promise.all([

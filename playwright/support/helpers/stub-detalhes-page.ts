@@ -6,7 +6,7 @@ import {
   DETALHES_FIXTURE_IDS,
   type GetItensOverrides,
 } from '../fixtures/factories/cotacao-detalhes-page'
-import { maybeInjectTestIds } from './inject-testids'
+import { maybeInjectDetalhesMenuActions, maybeInjectTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -169,6 +169,12 @@ export async function waitForDetalhesPageReady(page: Page) {
   await page
     .locator('.tr_overlay.v-overlay--active')
     .waitFor({ state: 'hidden' })
+}
+
+/** Open Ações menu and inject menu item testids when INJECT_TESTIDS=1. */
+export async function openAcoesMenu(page: Page) {
+  await page.getByTestId('detalhes-acoes-menu').click()
+  await maybeInjectDetalhesMenuActions(page)
 }
 
 export { DETALHES_FIXTURE_IDS }

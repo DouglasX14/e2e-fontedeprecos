@@ -1,6 +1,7 @@
 import { test, expect, log } from '../support/merged-fixtures'
 import {
   gotoDetalhesPage,
+  openAcoesMenu,
   stubDetalhesPageApis,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
@@ -120,7 +121,7 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Click Novo item and expect capacity dialog')
-    await page.getByTestId('detalhes-acoes-menu').click()
+    await openAcoesMenu(page)
     await page.getByTestId('detalhes-acao-novo-item').click()
 
     await expect(page.getByTestId('detalhes-send-quote-dialog')).toBeVisible()

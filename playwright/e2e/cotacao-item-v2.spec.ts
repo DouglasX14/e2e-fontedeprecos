@@ -7,7 +7,10 @@ import {
   buildPriceHistoryResponse,
 } from '../support/fixtures/factories'
 import {
+  clickItemTab,
   gotoItemPage,
+  openFormulaSelect,
+  reinjectItemTestIds,
   stubItemPageApis,
   waitForItemPageReady,
 } from '../support/helpers/stub-item-page'
@@ -69,7 +72,7 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
     await waitForItemPageReady(page)
 
     await log.step('Select Mediana formula')
-    await page.getByTestId('item-formula-select').click()
+    await openFormulaSelect(page)
     await page.getByTestId(`item-formula-option-${FORMULA_MEDIANA}`).click()
 
     await log.step('Assert set-formula payload')
@@ -101,8 +104,10 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
     await waitForItemPageReady(page)
 
     await log.step('Open Preços Excluídos tab and confirm bulk delete')
-    await page.getByTestId('item-tab-precos-excluidos').click()
+    await clickItemTab(page, 'item-tab-precos-excluidos')
     await page.getByTestId('item-delete-all-btn').click()
+    await page.getByRole('dialog').waitFor({ state: 'visible' })
+    await reinjectItemTestIds(page)
     await expect(page.getByTestId('item-delete-all-dialog')).toBeVisible()
     await expect(
       page.getByText(/preço.*removido|preços serão removidos/i),
@@ -150,7 +155,7 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
     await waitForItemPageReady(page)
 
     await log.step('Open Histórico de Alterações')
-    await page.getByTestId('item-tab-historico').click()
+    await clickItemTab(page, 'item-tab-historico')
 
     const { status, responseJson } = await historyCall
     expect(status).toBe(200)
@@ -261,6 +266,8 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
 
     await log.step('Soft-delete active price')
     await page.getByTestId('item-price-delete-btn').first().click()
+    await page.getByRole('dialog').waitFor({ state: 'visible' })
+    await reinjectItemTestIds(page)
     await expect(page.getByTestId('item-price-delete-dialog')).toBeVisible()
     await page.getByTestId('item-price-delete-confirm').click()
 
@@ -272,8 +279,10 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
     })
 
     await log.step('Restore excluded price from Preços Excluídos')
-    await page.getByTestId('item-tab-precos-excluidos').click()
+    await clickItemTab(page, 'item-tab-precos-excluidos')
     await page.getByTestId('item-price-restore-btn').click()
+    await page.getByRole('dialog').waitFor({ state: 'visible' })
+    await reinjectItemTestIds(page)
     await expect(page.getByTestId('item-price-restore-dialog')).toBeVisible()
     await page.getByTestId('item-price-restore-confirm').click()
 
@@ -295,7 +304,7 @@ test.describe('Cotação Item v2 — /v2/cotacoes/item/:id', () => {
     await stubs.getPricesCall
     await waitForItemPageReady(page)
 
-    await page.getByTestId('item-tab-grafico-comparativo').click()
+    await clickItemTab(page, 'item-tab-grafico-comparativo')
     await expect(page.getByTestId('item-chart-panel')).toBeVisible()
   })
 

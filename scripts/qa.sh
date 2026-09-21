@@ -20,11 +20,17 @@ export INJECT_TESTIDS="${INJECT_TESTIDS:-1}"
 export PLAYWRIGHT_PORT="${PLAYWRIGHT_PORT:-3010}"
 export BASE_URL="${BASE_URL:-http://127.0.0.1:${PLAYWRIGHT_PORT}}"
 
-DEFAULT_FRONTEND="$(cd "$ROOT/.." && pwd)/frontend-fp"
+# FRONTEND_DIR: env > ../frontend-fp > ../../frontend-fp
 if [[ -z "${FRONTEND_DIR:-}" ]]; then
-  if [[ -d "$DEFAULT_FRONTEND" ]]; then
-    export FRONTEND_DIR="$DEFAULT_FRONTEND"
-  fi
+  for candidate in \
+    "$(cd "$ROOT/.." && pwd)/frontend-fp" \
+    "$(cd "$ROOT/../.." && pwd)/frontend-fp"
+  do
+    if [[ -d "$candidate" ]]; then
+      export FRONTEND_DIR="$candidate"
+      break
+    fi
+  done
 fi
 
 echo "==> e2e-fontedeprecos QA ($MODE)"
@@ -64,9 +70,12 @@ fi
 if [[ "$app_up" -eq 0 ]]; then
   if [[ -z "${FRONTEND_DIR:-}" ]] || [[ ! -d "$FRONTEND_DIR" ]]; then
     echo "Erro: frontend não está em $BASE_URL e FRONTEND_DIR inválido."
-    echo "  Clone o frontend-fp ao lado deste repo (../frontend-fp), ou:"
-    echo "  FRONTEND_DIR=/caminho/para/frontend-fp yarn qa"
-    echo "  — ou suba o Nuxt antes e use BASE_URL=$BASE_URL"
+    echo "  Layout esperado:"
+    echo "    projetos/"
+    echo "      frontend-fp/"
+    echo "      e2e-fontedeprecos/"
+    echo "  Ou: FRONTEND_DIR=/caminho/absoluto/frontend-fp yarn qa"
+    echo "  Ou suba o Nuxt e use BASE_URL=$BASE_URL"
     exit 1
   fi
   echo "==> Playwright vai subir o Nuxt via FRONTEND_DIR"
@@ -96,7 +105,6 @@ check_frontend_pin() {
     echo "Aviso: não foi possível ler HEAD em $dir — pin não verificado."
     return 0
   fi
-  # match short SHA prefix either way
   if [[ "$head" == "$PIN_COMMIT"* || "$PIN_COMMIT" == "$head"* ]]; then
     echo "==> frontend pin OK ($head == $PIN_COMMIT de frontend.pin)"
     return 0
@@ -119,6 +127,12 @@ fi
 if [[ ! -d node_modules ]]; then
   echo "==> yarn install"
   yarn install
+fi
+
+if ! node -e "require('dotenv')" 2>/dev/null; then
+  echo "Erro: módulo 'dotenv' ausente (necessário para playwright-utils)."
+  echo "  Rode: yarn install   (ou yarn add -D dotenv) e git pull."
+  exit 1
 fi
 
 echo "==> Playwright Chromium"
@@ -155,29 +169,28 @@ fi
 echo "    FALHOU — veja o checklist e o report abaixo."
 echo ""
 echo "--- Falhas comuns ---"
-echo "  Cannot find module 'dotenv' →  git pull (dotenv no package.json) ou yarn add -D dotenv"
+echo "  Cannot find module 'dotenv' →  git pull / yarn install"
 echo "  Executable doesn't exist  →  re-rode yarn qa (instala Chromium)"
 echo "  Timeout / Loading...      →  Nuxt no ar? BASE_URL / FRONTEND_DIR ok?"
 echo "  Pin diverge               →  git checkout do commit em frontend.pin"
 echo "  Node errado               →  nvm use  (.nvmrc = 20)"
-echo "  Testid / seletor          →  INJECT_TESTIDS=1 (já é default do qa)"
+echo "  Testid / strict mode      →  git pull (inject) + yarn qa:report"
 echo "  App não sobe              →  yarn no frontend-fp; porta 3010 livre"
 echo ""
 
 ZIP="$ROOT/playwright-report-qa.zip"
-if [[ -d "$ROOT/playwright-report" ]]; then
-  rm -f "$ZIP"
+if [[ -f "$ROOT/playwright-report/index.html" ]]; then
+  rm -f "$ZIP" "${ZIP%.zip}.tgz"
   if command -v zip >/dev/null 2>&1; then
     (cd "$ROOT" && zip -qr "$ZIP" playwright-report)
   else
-    # fallback sem zip(1)
     (cd "$ROOT" && tar -czf "${ZIP%.zip}.tgz" playwright-report)
     ZIP="${ZIP%.zip}.tgz"
   fi
   echo "    Report empacotado: $ZIP"
   echo "    Envie este arquivo ao time (ou print do HTML)."
 else
-  echo "    Aviso: pasta playwright-report/ não encontrada — sem zip."
+  echo "    Aviso: playwright-report/index.html ausente — sem zip."
 fi
 echo "    Abrir HTML local: yarn qa:report"
 exit "$EXIT"

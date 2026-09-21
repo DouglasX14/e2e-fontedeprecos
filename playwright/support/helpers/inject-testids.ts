@@ -30,18 +30,21 @@ const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-memorial-btn', css: 'button:has-text("Gerar memorial"), button:has-text("Memorial")' },
   { testId: 'detalhes-cotacao-ia-btn', css: 'button:has-text("Cotação com IA"), button:has-text("Cotação IA")' },
   { testId: 'detalhes-acoes-menu', css: 'button:has-text("Ações")' },
-  { testId: 'detalhes-acao-novo-item', css: '[role="menuitem"]:has-text("Novo item"), .v-list-item:has-text("Novo item")' },
+  {
+    testId: 'detalhes-acao-novo-item',
+    css: '.v-menu__content .v-list-item:has-text("Novo item"), [role="menuitem"]:has-text("Novo item")',
+  },
   {
     testId: 'detalhes-acao-anexar-documentos',
-    css: '[role="menuitem"]:has-text("Anexar documentos"), .v-list-item:has-text("Anexar documentos"), a:has-text("Anexar documentos")',
+    css: '.v-menu__content .v-list-item:has-text("Anexar documentos"), [role="menuitem"]:has-text("Anexar documentos")',
   },
   {
     testId: 'detalhes-acao-colaboradores',
-    css: '[role="menuitem"]:has-text("Selecionar colaboradores"), .v-list-item:has-text("colaboradores")',
+    css: '.v-menu__content .v-list-item:has-text("Selecionar colaboradores"), [role="menuitem"]:has-text("colaboradores")',
   },
   {
     testId: 'detalhes-acao-cotacao-direta',
-    css: '[role="menuitem"]:has-text("Cotação direta"), .v-list-item:has-text("Cotação direta")',
+    css: '.v-menu__content .v-list-item:has-text("Cotação direta"), [role="menuitem"]:has-text("Cotação direta")',
   },
   { testId: 'detalhes-enviar-cotacao-btn', css: 'button:has-text("Enviar cotação")' },
   { testId: 'detalhes-prazo-adicional-btn', css: 'button:has-text("Prazo")' },
@@ -53,7 +56,12 @@ const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-mover-itens-btn', css: 'button:has-text("Mover")' },
   { testId: 'detalhes-filtro-item', css: 'input[aria-label="Nome do item"], label:has-text("Nome do item") + input, .v-text-field:has-text("Nome do item") input' },
   { testId: 'detalhes-filtro-buscar', css: 'button:has(.v-icon):near(input), button.primary:has(.mdi-magnify), button:has(.mdi-magnify)' },
-  { testId: 'detalhes-item-link', css: 'a[href*="/v2/cotacoes/item/"]', all: true },
+  // Text link only — exclude icon v-btn that also points at /item/
+  {
+    testId: 'detalhes-item-link',
+    css: 'a.text-decoration-none[href*="/v2/cotacoes/item/"]',
+    all: true,
+  },
   { testId: 'detalhes-lote-tag', css: 'span.lote-header-tag, .lote-header-tag' },
   { testId: 'detalhes-item-delete-btn', css: 'button:has(.mdi-delete), button[aria-label*="Excluir"]' },
   { testId: 'detalhes-item-duplicate-btn', css: 'button:has(.mdi-content-copy), button[aria-label*="Duplicar"]' },
@@ -99,26 +107,80 @@ const DETALHES_RULES: TestIdRule[] = [
 ]
 
 const ITEM_RULES: TestIdRule[] = [
-  { testId: 'item-kpi-total-prices', css: 'main h3' },
-  { testId: 'item-kpi-prices-mean', css: 'main h3 >> nth=1' },
-  { testId: 'item-formula-select', css: '.v-select:has-text("fórmula"), .v-select:has-text("Fórmula")' },
+  // KPI row — Vuetify 2 renders v-col as .col (not .v-col); avoid CotacaoItemDetalhes h3#title
+  {
+    testId: 'item-kpi-total-prices',
+    css: 'main .v-card .col:has(.mdi-counter) h3, main .v-card .col:has-text("Qnt. Preços") h3, main h3:not(#title)',
+  },
+  {
+    testId: 'item-kpi-prices-mean',
+    css: 'main .v-card .col:has(.mdi-chart-box-outline) h3, main .v-card .col:has-text("Média dos Preços") h3',
+  },
+  {
+    testId: 'item-formula-select',
+    css: '.v-select:has-text("fórmula"), .v-select:has-text("Fórmula"), .v-select:has-text("Selecione a fórmula")',
+  },
   { testId: 'item-add-price-btn', css: 'button:has-text("Adicionar"), button:has-text("Incluir")' },
-  { testId: 'item-delete-all-btn', css: 'button:has-text("Excluir todos"), button:has-text("Remover todos")' },
-  { testId: 'item-delete-all-dialog', css: '.v-dialog--active .v-card' },
-  { testId: 'item-delete-all-confirm', css: '.v-dialog--active button:has-text("Excluir"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'item-tab-precos-excluidos', css: '[role="tab"]:has-text("Excluídos"), .v-tab:has-text("Excluídos")' },
-  { testId: 'item-tab-historico', css: '[role="tab"]:has-text("Histórico"), .v-tab:has-text("Histórico")' },
-  { testId: 'item-tab-grafico-comparativo', css: '[role="tab"]:has-text("Gráfico"), .v-tab:has-text("comparativo")' },
-  { testId: 'item-chart-panel', css: '.v-window-item--active .v-row, [class*="chart"]' },
-  { testId: 'item-price-toggle-calculate', css: 'input[type="checkbox"], .v-input--selection-controls' },
-  { testId: 'item-price-delete-btn', css: 'button:has(.mdi-delete), .mdi-delete', all: true },
-  { testId: 'item-price-delete-dialog', css: '.v-dialog--active .v-card:has-text("Excluir")' },
-  { testId: 'item-price-delete-confirm', css: '.v-dialog--active button:has-text("Excluir")' },
-  { testId: 'item-price-restore-btn', css: 'button:has-text("Restaurar"), button:has(.mdi-restore)' },
-  { testId: 'item-price-restore-dialog', css: '.v-dialog--active .v-card:has-text("Restaurar")' },
-  { testId: 'item-price-restore-confirm', css: '.v-dialog--active button:has-text("Restaurar"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'item-nav-next', css: 'button:has(.mdi-chevron-right), button:has-text("Próximo")' },
-  { testId: 'item-nav-prev', css: 'button:has(.mdi-chevron-left), button:has-text("Anterior")' },
+  {
+    testId: 'item-delete-all-btn',
+    css: 'button:has-text("excluir preços"), button:has-text("Excluir todos"), button:has-text("Remover todos")',
+  },
+  {
+    testId: 'item-delete-all-dialog',
+    css: '[role="dialog"]:has-text("Excluir preços"), .v-dialog--active .v-card:has-text("Excluir preços")',
+  },
+  {
+    testId: 'item-delete-all-confirm',
+    css: '[role="dialog"]:has-text("Excluir preços") button:has-text("Excluir")',
+  },
+  // CotacaoItemTab uses v-list-item (a11y option), not v-tab
+  {
+    testId: 'item-tab-precos-excluidos',
+    css: '.tab-menu .v-list-item:has-text("Preços Excluídos"), .v-list-item:has-text("Preços Excluídos"), [role="option"]:has-text("Preços Excluídos")',
+  },
+  {
+    testId: 'item-tab-historico',
+    css: '.tab-menu .v-list-item:has-text("Histórico"), .v-list-item:has-text("Histórico de Alterações"), [role="option"]:has-text("Histórico")',
+  },
+  {
+    testId: 'item-tab-grafico-comparativo',
+    css: '.tab-menu .v-list-item:has-text("Gráfico"), .v-list-item:has-text("Gráfico Comparativo"), [role="option"]:has-text("Gráfico")',
+  },
+  { testId: 'item-chart-panel', css: 'canvas, .apexcharts-canvas, [class*="chartjs"], .v-card canvas' },
+  // Toggle is v-icon (tooltip text only) — close-circle = off, check-circle = on
+  {
+    testId: 'item-price-toggle-calculate',
+    css: '.v-expansion-panel .mdi-close-circle, .v-expansion-panel .mdi-check-circle',
+  },
+  // Scope to expansion panel — tab "Preços Excluídos" also uses mdi-delete
+  {
+    testId: 'item-price-delete-btn',
+    css: '.v-expansion-panel .mdi-delete',
+    all: true,
+  },
+  {
+    testId: 'item-price-delete-dialog',
+    css: '[role="dialog"]:has-text("excluídos"), [role="dialog"]:has-text("Excluir preço"), .v-dialog--active .v-card:has-text("excluídos")',
+  },
+  {
+    testId: 'item-price-delete-confirm',
+    css: '[role="dialog"]:has-text("excluídos") button:has-text("Excluir"), [role="dialog"]:has-text("Excluir preço") button:has-text("Excluir")',
+  },
+  {
+    testId: 'item-price-restore-btn',
+    css: '.v-expansion-panel .mdi-restore, .v-expansion-panel button:has-text("Restaurar")',
+  },
+  {
+    testId: 'item-price-restore-dialog',
+    css: '[role="dialog"]:has-text("Restaurar"), [role="dialog"]:has-text("restaurado"), .v-dialog--active .v-card:has-text("Restaurar")',
+  },
+  {
+    testId: 'item-price-restore-confirm',
+    css: '[role="dialog"] button:has-text("Restaurar"), .v-dialog--active button:has-text("Restaurar")',
+  },
+  // CotacaoItemDetalhes uses mdi-arrow-right / mdi-arrow-left
+  { testId: 'item-nav-next', css: 'button:has(.mdi-arrow-right), button:has(.mdi-chevron-right)' },
+  { testId: 'item-nav-prev', css: 'button:has(.mdi-arrow-left), button:has(.mdi-chevron-left)' },
 ]
 
 const DOCUMENTOS_RULES: TestIdRule[] = [
@@ -244,7 +306,7 @@ export async function injectDynamicDetalhesTestIds(
       if (name && name.classList.contains('lote-name')) set(name, `detalhes-lote-nome-${id}`)
     })
 
-    document.querySelectorAll('a[href*="/v2/cotacoes/item/"]').forEach((a) => {
+    document.querySelectorAll('a.text-decoration-none[href*="/v2/cotacoes/item/"]').forEach((a) => {
       const m = a.getAttribute('href')?.match(/item\/(\d+)/)
       const row = a.closest('tr')
       if (m && row) set(row, `detalhes-item-row-${m[1]}`)
@@ -261,6 +323,59 @@ export async function injectDynamicDetalhesTestIds(
   }, options?.force ?? false)
 }
 
+const DETALHES_MENU_ACTION_RULES: TestIdRule[] = [
+  {
+    testId: 'detalhes-acao-novo-item',
+    css: '.v-menu__content .v-list-item:has-text("Novo item")',
+  },
+  {
+    testId: 'detalhes-acao-anexar-documentos',
+    css: '.v-menu__content .v-list-item:has-text("Anexar documentos")',
+  },
+  {
+    testId: 'detalhes-acao-colaboradores',
+    css: '.v-menu__content .v-list-item:has-text("Selecionar colaboradores")',
+  },
+  {
+    testId: 'detalhes-acao-cotacao-direta',
+    css: '.v-menu__content .v-list-item:has-text("Cotação direta")',
+  },
+]
+
+/** Inject Ações menu items after the menu is open. */
+export async function maybeInjectDetalhesMenuActions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await injectTestIds(page, DETALHES_MENU_ACTION_RULES, { force: true })
+}
+
+/** Inject formula dropdown options (menu must be open). */
+export async function maybeInjectItemFormulaOptions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await page.evaluate(() => {
+    const pairs: Array<[RegExp, string]> = [
+      [/média aritmética/i, 'item-formula-option-2'],
+      [/^mediana/i, 'item-formula-option-3'],
+      [/menor preço/i, 'item-formula-option-4'],
+      [/média saneada/i, 'item-formula-option-5'],
+      [/média ponderada/i, 'item-formula-option-6'],
+      [/média relativa/i, 'item-formula-option-7'],
+    ]
+    document
+      .querySelectorAll(
+        '.v-menu__content .v-list-item, .v-select-list .v-list-item, [role="option"]',
+      )
+      .forEach((opt) => {
+        const text = (opt.textContent || '').trim()
+        for (const [re, id] of pairs) {
+          if (re.test(text)) {
+            opt.setAttribute('data-testid', id)
+            break
+          }
+        }
+      })
+  })
+}
+
 /** Convenience: inject surface + dynamic detalhes ids when enabled via env. */
 export async function maybeInjectTestIds(
   page: Page,
@@ -270,5 +385,52 @@ export async function maybeInjectTestIds(
   await injectTestIds(page, surface)
   if (surface === 'detalhes') {
     await injectDynamicDetalhesTestIds(page)
+  }
+}
+
+/** Force re-apply item registry (dialogs / tab-gated controls after UI mutation). */
+export async function maybeReinjectItemTestIds(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await injectTestIds(page, 'item', { force: true })
+  await injectOpenItemDialogs(page)
+}
+
+/** Map visible dialogs via role/text — Vuetify :has-text CSS is unreliable on role=dialog. */
+async function injectOpenItemDialogs(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog')
+  const count = await dialog.count()
+  if (count === 0) return
+
+  for (let i = 0; i < count; i++) {
+    const d = dialog.nth(i)
+    if (!(await d.isVisible().catch(() => false))) continue
+    const text = ((await d.innerText().catch(() => '')) || '').replace(/\s+/g, ' ')
+
+    let dialogId: string | null = null
+    let confirmId: string | null = null
+    let confirmName: RegExp = /^Excluir$/i
+
+    if (/Excluir preços\?/i.test(text) || /preço será removido|preços serão removidos/i.test(text)) {
+      dialogId = 'item-delete-all-dialog'
+      confirmId = 'item-delete-all-confirm'
+      confirmName = /^Excluir$/i
+    } else if (/Mover para preços excluídos|Excluir preço\?/i.test(text)) {
+      dialogId = 'item-price-delete-dialog'
+      confirmId = 'item-price-delete-confirm'
+      confirmName = /^Excluir$/i
+    } else if (/restaurad|Restaurar/i.test(text) && /preço/i.test(text)) {
+      dialogId = 'item-price-restore-dialog'
+      confirmId = 'item-price-restore-confirm'
+      confirmName = /^Restaurar$/i
+    }
+
+    if (!dialogId) continue
+    await d.evaluate((el, id) => el.setAttribute('data-testid', id), dialogId)
+    if (confirmId) {
+      const btn = d.getByRole('button', { name: confirmName })
+      if ((await btn.count()) > 0) {
+        await btn.first().evaluate((el, id) => el.setAttribute('data-testid', id), confirmId)
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@ import {
 } from '../support/fixtures/factories'
 import {
   gotoDetalhesPage,
+  openAcoesMenu,
   stubDetalhesPageApis,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
@@ -89,6 +90,8 @@ test.describe('Cotação Detalhes v2 — core (P0/P1)', () => {
     await page.getByTestId('detalhes-filtro-buscar').click()
 
     await expect.poll(() => filterHits).toBeGreaterThanOrEqual(2)
+    // Vue re-renders the table — re-inject testids lost on DOM replace
+    await waitForDetalhesPageReady(page)
     await expect(page.getByTestId('detalhes-item-link')).toHaveCount(1)
     await expect(page.getByTestId('detalhes-item-link')).toContainText(
       'Parafuso hexagonal M6',
@@ -131,7 +134,7 @@ test.describe('Cotação Detalhes v2 — core (P0/P1)', () => {
     await stubs.getItensCall
     await waitForDetalhesPageReady(page)
 
-    await page.getByTestId('detalhes-acoes-menu').click()
+    await openAcoesMenu(page)
     const novoItem = page.getByTestId('detalhes-acao-novo-item')
     await expect(novoItem).toBeVisible()
     await Promise.all([

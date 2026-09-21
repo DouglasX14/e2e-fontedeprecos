@@ -5,7 +5,7 @@ import {
   ITEM_FIXTURE_IDS,
   type GetPricesOverrides,
 } from '../fixtures/factories'
-import { maybeInjectTestIds } from './inject-testids'
+import { maybeInjectItemFormulaOptions, maybeInjectTestIds, maybeReinjectItemTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -131,6 +131,23 @@ export async function waitForItemPageReady(page: Page) {
   await maybeInjectTestIds(page, 'item')
   await page.getByTestId('item-kpi-total-prices').waitFor({ state: 'visible' })
   await page.locator('.tr_overlay.v-overlay--active').waitFor({ state: 'hidden' })
+}
+
+/** Click a side-tab and re-inject (tab-gated buttons/dialogs appear after switch). */
+export async function clickItemTab(page: Page, tabTestId: string) {
+  await page.getByTestId(tabTestId).click()
+  await maybeReinjectItemTestIds(page)
+}
+
+/** Re-inject after opening a dialog / mutating price row UI. */
+export async function reinjectItemTestIds(page: Page) {
+  await maybeReinjectItemTestIds(page)
+}
+
+/** Open formula v-select and inject option testids when INJECT_TESTIDS=1. */
+export async function openFormulaSelect(page: Page) {
+  await page.getByTestId('item-formula-select').click()
+  await maybeInjectItemFormulaOptions(page)
 }
 
 export { ITEM_FIXTURE_IDS }

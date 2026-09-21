@@ -6,7 +6,15 @@ Suíte **Playwright E2E** da cotação v2 do Fonte de Preços (Item, Detalhes, s
 
 Repo: https://github.com/DouglasX14/e2e-fontedeprecos · branch **`main`**
 
-1. Clone este repo **ao lado** do `frontend-fp` (mesmo diretório pai).
+Layout de pastas (recomendado):
+
+```
+projetos/
+  frontend-fp/           # app Nuxt (homolog / pin)
+  e2e-fontedeprecos/     # este repo
+```
+
+1. Clone os dois lados a lado (ou use `FRONTEND_DIR` absoluto).
 2. **Node 20** neste repo (`nvm use` — ver `.nvmrc`; mínimo 18).
 3. Front no pin documentado (`frontend.pin` → `homolog` / commit `6abd19b`):
 
@@ -21,22 +29,28 @@ yarn qa:smoke   # rápido (P0)
 yarn qa         # suíte cotação v2 completa
 ```
 
-4. Se falhar: o script gera `playwright-report-qa.zip` — **envie esse zip**.  
+Front em outro path:
+
+```bash
+FRONTEND_DIR=/caminho/absoluto/frontend-fp yarn qa:smoke
+```
+
+4. Se falhar: o script gera `playwright-report-qa.zip` (só se houver HTML) — **envie esse zip**.  
    Abrir HTML local: `yarn qa:report`.
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
-Front em outro path: `FRONTEND_DIR=/caminho/frontend-fp yarn qa`.  
 Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 
 ### Falhas comuns
 
 | Sintoma | O que fazer |
 |---------|-------------|
-| `Cannot find module 'dotenv'` | `git pull` (já no package.json) ou `yarn add -D dotenv` |
+| `Cannot find module 'dotenv'` | `git pull` + `yarn install` |
 | `Executable doesn't exist` | Re-rodar `yarn qa` (instala Chromium) |
 | Timeout / `Loading...` | Nuxt no ar; conferir `BASE_URL` / `FRONTEND_DIR` |
 | Pin diverge | `git checkout` do commit em `frontend.pin` |
 | Node errado | `nvm use` (`.nvmrc` = 20) |
+| `strict mode` / testid errado | `git pull` (inject) + `yarn qa:report` |
 | Testid / seletor | `INJECT_TESTIDS=1` (já default do `qa`) |
 | App não sobe | `yarn` no `frontend-fp`; porta 3010 livre |
 
