@@ -86,6 +86,32 @@ playwright.config.ts
 - Network-first: `interceptNetworkCall` **antes** de `page.goto`.
 - Maioria dos specs cotação v2: `authSessionEnabled: false` + stub de sessão.
 
+## Injeção de `data-testid` (sem alterar o Dynamics)
+
+Se o `frontend-fp` sob teste **não** tiver os `data-testid` no template, ative a injeção no DOM:
+
+```bash
+INJECT_TESTIDS=1 FRONTEND_DIR=../frontend-fp \
+  BASE_URL=http://127.0.0.1:3010 PLAYWRIGHT_PORT=3010 \
+  yarn test:e2e:cotacao-v2:stable
+```
+
+API (sob demanda nos specs):
+
+```ts
+import {
+  injectTestIds,
+  ensureTestId,
+  injectDynamicDetalhesTestIds,
+} from '../support/helpers/inject-testids'
+
+await injectTestIds(page, 'detalhes') // ou 'item' | 'documentos' | ...
+await ensureTestId(page, 'detalhes-acoes-menu', 'button:has-text("Ações")')
+```
+
+Helper: `playwright/support/helpers/inject-testids.ts`.  
+Com `INJECT_TESTIDS=1`, os waits (`waitForDetalhesPageReady`, `waitForItemPageReady`, gotos de satellites) aplicam o registry automaticamente.
+
 ## Estabilidade
 
 Paralelo + Nuxt frio pode gerar timeout em `Loading...` (flake de cold-start).  

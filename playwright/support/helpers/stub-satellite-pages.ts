@@ -5,6 +5,7 @@ import {
   DETALHES_FIXTURE_IDS,
   type GetItensOverrides,
 } from '../fixtures/factories/cotacao-detalhes-page'
+import { maybeInjectTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -138,6 +139,7 @@ export async function gotoDocumentosPage(
   cotacaoId = SATELLITE_FIXTURE_IDS.COTACAO_ID,
 ) {
   await page.goto(`/v2/cotacoes/${cotacaoId}/documentos`, { timeout: 90_000 })
+  await maybeInjectTestIds(page, 'documentos')
 }
 
 /** Stubs for `/v2/cotacoes/:id/selecionar-colaboradores`. */
@@ -198,6 +200,7 @@ export async function gotoColaboradoresPage(
   await page.goto(`/v2/cotacoes/${cotacaoId}/selecionar-colaboradores`, {
     timeout: 90_000,
   })
+  await maybeInjectTestIds(page, 'colaboradores')
 }
 
 /** Stubs for `/v2/cotacao/cotacoes/detalhes/:id/direta`. */
@@ -266,6 +269,7 @@ export async function gotoDiretaPage(
   await page.goto(`/v2/cotacao/cotacoes/detalhes/${cotacaoId}/direta`, {
     timeout: 90_000,
   })
+  await maybeInjectTestIds(page, 'direta')
 }
 
 export { DETALHES_FIXTURE_IDS }

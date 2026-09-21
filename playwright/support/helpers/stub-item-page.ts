@@ -5,6 +5,7 @@ import {
   ITEM_FIXTURE_IDS,
   type GetPricesOverrides,
 } from '../fixtures/factories'
+import { maybeInjectTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -127,6 +128,7 @@ export async function gotoItemPage(page: Page, itemId = ITEM_FIXTURE_IDS.ITEM_ID
 
 /** Wait until layout loading overlay is gone so clicks are not intercepted. */
 export async function waitForItemPageReady(page: Page) {
+  await maybeInjectTestIds(page, 'item')
   await page.getByTestId('item-kpi-total-prices').waitFor({ state: 'visible' })
   await page.locator('.tr_overlay.v-overlay--active').waitFor({ state: 'hidden' })
 }
