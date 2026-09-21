@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Playwright E2E suite for Fonte de Preços cotação v2 (Item, Detalhes, satellites)",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "qa": "bash scripts/qa.sh",
     "qa:smoke": "bash scripts/qa.sh smoke",

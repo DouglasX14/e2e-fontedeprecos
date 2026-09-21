@@ -34,13 +34,20 @@ echo "    FRONTEND_DIR=${FRONTEND_DIR:-(não definido)}"
 
 # --- Node >= 18 ---
 if ! command -v node >/dev/null 2>&1; then
-  echo "Erro: Node.js não encontrado. Instale Node 18+."
+  echo "Erro: Node.js não encontrado. Instale Node 18+ (recomendado: nvm use neste repo)."
   exit 1
 fi
 NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
 if [[ "$NODE_MAJOR" -lt 18 ]]; then
   echo "Erro: Node $NODE_MAJOR detectado; precisa Node 18+."
   exit 1
+fi
+
+if [[ -f "$ROOT/.nvmrc" ]]; then
+  WANT_NODE="$(tr -d '[:space:]' < "$ROOT/.nvmrc")"
+  if [[ -n "$WANT_NODE" && "$NODE_MAJOR" != "$WANT_NODE" ]]; then
+    echo "Aviso: Node $NODE_MAJOR em uso; .nvmrc recomenda $WANT_NODE (nvm use)."
+  fi
 fi
 
 if ! command -v yarn >/dev/null 2>&1; then
@@ -65,7 +72,47 @@ if [[ "$app_up" -eq 0 ]]; then
   echo "==> Playwright vai subir o Nuxt via FRONTEND_DIR"
 else
   echo "==> App já responde em $BASE_URL (reuseExistingServer)"
-  # App no ar: não força webServer se FRONTEND_DIR apontar errado — ok deixar exportado
+fi
+
+# --- pin frontend.pin ---
+PIN_FILE="$ROOT/frontend.pin"
+PIN_COMMIT=""
+if [[ -f "$PIN_FILE" ]]; then
+  PIN_COMMIT="$(grep '^commit=' "$PIN_FILE" | head -1 | cut -d= -f2- | tr -d '[:space:]')"
+fi
+
+check_frontend_pin() {
+  local dir="$1"
+  if [[ -z "$PIN_COMMIT" ]]; then
+    return 0
+  fi
+  if [[ ! -d "$dir/.git" ]] && ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "Aviso: FRONTEND_DIR não é repo git — pin $PIN_COMMIT não verificado."
+    return 0
+  fi
+  local head
+  head="$(git -C "$dir" rev-parse --short HEAD 2>/dev/null || true)"
+  if [[ -z "$head" ]]; then
+    echo "Aviso: não foi possível ler HEAD em $dir — pin não verificado."
+    return 0
+  fi
+  # match short SHA prefix either way
+  if [[ "$head" == "$PIN_COMMIT"* || "$PIN_COMMIT" == "$head"* ]]; then
+    echo "==> frontend pin OK ($head == $PIN_COMMIT de frontend.pin)"
+    return 0
+  fi
+  echo "Aviso: frontend HEAD=$head diverge do pin $PIN_COMMIT (ref em frontend.pin)."
+  echo "  Ideal: cd \"$dir\" && git fetch && git checkout $PIN_COMMIT"
+  if [[ "${STRICT_FRONTEND_PIN:-}" == "1" ]]; then
+    echo "Erro: STRICT_FRONTEND_PIN=1 — abortando."
+    exit 1
+  fi
+}
+
+if [[ -n "${FRONTEND_DIR:-}" && -d "${FRONTEND_DIR}" ]]; then
+  check_frontend_pin "$FRONTEND_DIR"
+elif [[ "$app_up" -eq 1 ]]; then
+  echo "Aviso: pin não verificado (app já no ar / sem FRONTEND_DIR)."
 fi
 
 # --- deps ---

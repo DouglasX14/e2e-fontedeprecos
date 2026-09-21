@@ -7,11 +7,14 @@ Suíte **Playwright E2E** da cotação v2 do Fonte de Preços (Item, Detalhes, s
 Branch: [`feat/inject-testids-on-demand`](https://github.com/DouglasX14/e2e-fontedeprecos/tree/feat/inject-testids-on-demand)
 
 1. Clone este repo **ao lado** do `frontend-fp` (mesmo diretório pai).
-2. Node 18+ e Yarn instalados.
-3. Rode:
+2. **Node 20** neste repo (`nvm use` — ver `.nvmrc`; mínimo 18).
+3. Front no pin documentado (`frontend.pin` → `homolog` / commit `6abd19b`):
 
 ```bash
-cd e2e-fontedeprecos
+cd ../frontend-fp
+git fetch
+git checkout homolog   # ideal: git checkout 6abd19b
+cd ../e2e-fontedeprecos
 git checkout feat/inject-testids-on-demand
 yarn qa:smoke   # rápido (P0)
 # ou
@@ -21,7 +24,8 @@ yarn qa         # suíte cotação v2 completa
 4. Se falhar: `yarn test:e2e:report` e envie print ou zip de `playwright-report/`.
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
-Front em outro path: `FRONTEND_DIR=/caminho/frontend-fp yarn qa`.
+Front em outro path: `FRONTEND_DIR=/caminho/frontend-fp yarn qa`.  
+Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 
 ---
 
