@@ -6,6 +6,7 @@ import {
   DETALHES_FIXTURE_IDS,
   type GetItensOverrides,
 } from '../fixtures/factories/cotacao-detalhes-page'
+import { maybeInjectTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -163,6 +164,7 @@ export async function gotoDetalhesPage(
 
 /** Wait until skeleton is gone and header is visible. */
 export async function waitForDetalhesPageReady(page: Page) {
+  await maybeInjectTestIds(page, 'detalhes')
   await page.getByTestId('detalhes-cotacao-nome').waitFor({ state: 'visible' })
   await page
     .locator('.tr_overlay.v-overlay--active')
