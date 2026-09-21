@@ -4,7 +4,7 @@ Suíte **Playwright E2E** da cotação v2 do Fonte de Preços (Item, Detalhes, s
 
 ## Para QA / suporte
 
-Branch: [`feat/inject-testids-on-demand`](https://github.com/DouglasX14/e2e-fontedeprecos/tree/feat/inject-testids-on-demand)
+Repo: https://github.com/DouglasX14/e2e-fontedeprecos · branch **`main`**
 
 1. Clone este repo **ao lado** do `frontend-fp` (mesmo diretório pai).
 2. **Node 20** neste repo (`nvm use` — ver `.nvmrc`; mínimo 18).
@@ -15,7 +15,7 @@ cd ../frontend-fp
 git fetch
 git checkout homolog   # ideal: git checkout 6abd19b
 cd ../e2e-fontedeprecos
-git checkout feat/inject-testids-on-demand
+git checkout main && git pull
 yarn qa:smoke   # rápido (P0)
 # ou
 yarn qa         # suíte cotação v2 completa
