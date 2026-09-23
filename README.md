@@ -15,7 +15,7 @@ projetos/
 ```
 
 1. Clone os dois lados a lado (ou use `FRONTEND_DIR` absoluto).
-2. **Node 20** neste repo (`nvm use` — ver `.nvmrc`; mínimo 18).
+2. **Node 26** neste repo (`nvm use` — ver `.nvmrc`; mínimo 18).
 3. Front no pin documentado (`frontend.pin` → `homolog` / commit `6abd19b`):
 
 ```bash
@@ -49,7 +49,7 @@ Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 | `Executable doesn't exist` | Re-rodar `yarn qa` (instala Chromium) |
 | Timeout / `Loading...` | Nuxt no ar; conferir `BASE_URL` / `FRONTEND_DIR` |
 | Pin diverge | `git checkout` do commit em `frontend.pin` |
-| Node errado | `nvm use` (`.nvmrc` = 20) |
+| Node errado | `nvm use` (`.nvmrc` = 26) |
 | `strict mode` / testid errado | `git pull` (inject) + `yarn qa:report` |
 | Testid / seletor | `INJECT_TESTIDS=1` (já default do `qa`) |
 | App não sobe | `yarn` no `frontend-fp`; porta 3010 livre |
