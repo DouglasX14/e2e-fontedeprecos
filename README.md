@@ -40,6 +40,7 @@ FRONTEND_DIR=/caminho/absoluto/frontend-fp yarn qa:smoke
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
 Se o Nuxt não estiver no ar, o `qa` sobe ele uma vez (log em `.qa-nuxt.log`), pré-aquece todas as rotas da suíte e só então roda o Playwright; ao final, encerra o Nuxt.  
+No fim da execução aparece um **Resumo QA** em português (passou / falhou / pulado + motivo e dica).  
 Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 
 ### Rodar várias vezes seguidas (mais rápido)
@@ -67,6 +68,7 @@ yarn qa
 | `strict mode` / testid errado | `git pull` (inject) + `yarn qa:report` |
 | Testid / seletor | `INJECT_TESTIDS=1` (já default do `qa`) |
 | App não sobe | `yarn` no `frontend-fp`; porta 3010 livre; ver `.qa-nuxt.log` |
+| 2 skipped (`item-api`) | Normal sem `RUN_LIVE_ITEM_API=1` — não é falha; o Resumo QA explica o motivo |
 
 ---
 

@@ -248,12 +248,12 @@ echo ""
 echo "==> Exit code: $EXIT"
 
 if [[ "$EXIT" -eq 0 ]]; then
-  echo "    OK — suíte passou."
-  echo "    Relatório (opcional): yarn qa:report"
+  echo "    OK — suíte passou (resumo acima: passou / pulado / falhou)."
+  echo "    Relatório HTML: yarn qa:report"
   exit 0
 fi
 
-echo "    FALHOU — veja o checklist e o report abaixo."
+echo "    FALHOU — leia o bloco «Resumo QA» acima (motivo + dica por teste)."
 echo ""
 echo "--- Falhas comuns ---"
 echo "  Cannot find module 'dotenv' →  git pull / yarn install"
@@ -263,6 +263,7 @@ echo "  Pin diverge               →  git checkout do commit em frontend.pin"
 echo "  Node errado               →  nvm use  (.nvmrc = 26)"
 echo "  Testid / strict mode      →  git pull (inject) + yarn qa:report"
 echo "  App não sobe              →  yarn no frontend-fp; porta 3010 livre; veja .qa-nuxt.log"
+echo "  2 skipped (item-api)      →  normal sem RUN_LIVE_ITEM_API=1 (não é falha)"
 echo ""
 
 ZIP="$ROOT/playwright-report-qa.zip"

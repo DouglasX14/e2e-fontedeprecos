@@ -17,6 +17,7 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['./playwright/support/reporters/qa-summary-reporter.ts'],
   ],
   use: {
     baseURL: BASE_URL,

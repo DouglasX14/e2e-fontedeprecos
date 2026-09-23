@@ -26,7 +26,12 @@ type PriceHistoryBody = {
 }
 
 test.describe('Cotação Item API — live (optional)', () => {
-  test.skip(!live, 'Set RUN_LIVE_ITEM_API=1 and TEST_ITEM_ID with a valid session')
+  test.skip(
+    !live,
+    'API live desligada: este spec chama o Django de verdade. ' +
+      'Para rodar: RUN_LIVE_ITEM_API=1 TEST_ITEM_ID=<id> AUTH_BASE_URL=<django> ' +
+      'com sessão válida. No dia a dia use cotacao-item-v2.spec.ts (stubs, sem backend).',
+  )
   // AuthProvider.manageAuthToken → Django /login (still skipped in CI by default)
   test.use({ authSessionEnabled: true })
 
