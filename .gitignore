@@ -9,6 +9,7 @@ node_modules/
 /playwright-report-qa.zip
 /playwright-report-qa.tgz
 /blob-report/
+/.qa-nuxt.log
 /playwright/.cache/
 /playwright/auth-sessions/*
 !/playwright/auth-sessions/.gitkeep

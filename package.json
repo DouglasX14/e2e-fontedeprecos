@@ -10,6 +10,7 @@
     "qa": "bash scripts/qa.sh",
     "qa:smoke": "bash scripts/qa.sh smoke",
     "qa:full": "bash scripts/qa.sh full",
+    "qa:server": "bash scripts/qa.sh server",
     "qa:report": "playwright show-report playwright-report",
     "test:e2e": "playwright test",
     "test:e2e:cotacao-v2": "playwright test playwright/e2e/cotacao-*.spec.ts",

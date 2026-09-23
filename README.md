@@ -39,7 +39,21 @@ FRONTEND_DIR=/caminho/absoluto/frontend-fp yarn qa:smoke
    Abrir HTML local: `yarn qa:report`.
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
+Se o Nuxt não estiver no ar, o `qa` sobe ele uma vez (log em `.qa-nuxt.log`), pré-aquece todas as rotas da suíte e só então roda o Playwright; ao final, encerra o Nuxt.  
 Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
+
+### Rodar várias vezes seguidas (mais rápido)
+
+Deixe o Nuxt quente num terminal e reutilize em todos os runs:
+
+```bash
+# terminal 1 — sobe + pré-aquece; fica no ar (Ctrl+C encerra)
+yarn qa:server
+
+# terminal 2 — reutiliza o Nuxt já no ar (sem cold start)
+yarn qa:smoke
+yarn qa
+```
 
 ### Falhas comuns
 
@@ -52,7 +66,7 @@ Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 | Node errado | `nvm use` (`.nvmrc` = 26) |
 | `strict mode` / testid errado | `git pull` (inject) + `yarn qa:report` |
 | Testid / seletor | `INJECT_TESTIDS=1` (já default do `qa`) |
-| App não sobe | `yarn` no `frontend-fp`; porta 3010 livre |
+| App não sobe | `yarn` no `frontend-fp`; porta 3010 livre; ver `.qa-nuxt.log` |
 
 ---
 
@@ -100,6 +114,7 @@ yarn test:e2e:cotacao-v2:stable
 |---------|-----|
 | `yarn qa` / `yarn qa:full` | Kit QA: install + Chromium + suíte cotação v2 (inject, workers=1) |
 | `yarn qa:smoke` | Kit QA rápido (detalhes core + item v2) |
+| `yarn qa:server` | Sobe o Nuxt na 3010, pré-aquece as rotas e fica no ar para os próximos `qa` |
 | `yarn qa:report` | Abre o HTML report (`playwright-report/`) |
 | `yarn test:e2e` | Todos os specs em `playwright/e2e/` |
 | `yarn test:e2e:cotacao-v2` | Suíte `cotacao-*.spec.ts` |
