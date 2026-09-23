@@ -32,7 +32,9 @@ export function buildSessionUser(overrides: SessionUserOverrides = {}) {
       schema: 'cliente',
       host: 'cliente.local',
       preferences: { decimal_places: 2 },
+      plan: { name: 'PROFESSIONAL', years_filter_limit: null },
     },
+    groups: [],
     permissions: overrides.permissions ?? [
       'quotation.cotacoes',
       'quotation.detalhes_cotacoes',

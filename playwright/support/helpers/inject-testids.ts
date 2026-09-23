@@ -22,6 +22,9 @@ export type TestIdSurface =
   | 'documentos'
   | 'colaboradores'
   | 'direta'
+  | 'adicionar-item'
+  | 'expressa'
+  | 'lista'
 
 const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light' },
@@ -208,12 +211,84 @@ const DIRETA_RULES: TestIdRule[] = [
   { testId: 'direta-salvar-btn', css: 'button:has-text("Salvar")', all: true },
 ]
 
+const ADICIONAR_ITEM_RULES: TestIdRule[] = [
+  { testId: 'adicionar-item-page', css: 'main .v-card.w-full, main .v-card' },
+  { testId: 'adicionar-item-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light, main p.text-h5' },
+  { testId: 'adicionar-item-nome', css: 'label:has-text("Nome") ~ input, .v-text-field:has-text("Nome") input' },
+  {
+    testId: 'adicionar-item-quantidade',
+    css: 'label:has-text("Quantidade") ~ input, .v-text-field:has-text("Quantidade") input',
+  },
+  {
+    testId: 'adicionar-item-unidade',
+    css: '.v-select:has-text("Unidade de medida"), label:has-text("Unidade de medida") ~ div',
+  },
+  { testId: 'adicionar-item-lote', css: '.v-select:has-text("Lote"), label:has-text("Lote") ~ div' },
+  {
+    testId: 'adicionar-item-descricao',
+    css: 'label:has-text("Descri") ~ input, .v-text-field:has-text("Descri") input',
+  },
+  {
+    testId: 'adicionar-item-submit',
+    css: 'button:has-text("Adicionar"), button:has-text("Salvar")',
+  },
+  {
+    testId: 'adicionar-item-voltar',
+    css: 'a:has-text("Voltar"), button:has-text("Voltar")',
+  },
+]
+
+const EXPRESSA_RULES: TestIdRule[] = [
+  { testId: 'expressa-page', css: 'main .cotacao-detail-root, main .v-card, main' },
+  {
+    testId: 'expressa-item-nome',
+    css: '.item-header__description, .cotacao-detail-card .item-header',
+  },
+  {
+    testId: 'expressa-keyword',
+    css: 'label:has-text("Descrição") ~ input, label:has-text("Palavra chave") ~ input, .v-text-field:has-text("Descrição") input, .v-autocomplete:has-text("Palavra chave") input',
+  },
+  { testId: 'expressa-buscar-btn', css: 'button:has-text("Buscar")' },
+  {
+    testId: 'expressa-results',
+    css: 'main .v-card:has-text("Foram encontrados"), main .v-card-subtitle:has-text("homologados")',
+  },
+]
+
+const LISTA_RULES: TestIdRule[] = [
+  { testId: 'lista-page', css: 'main .v-card, main' },
+  {
+    testId: 'lista-adicionar-cotacao',
+    css: 'a:has-text("Adicionar cotação"), button:has-text("Adicionar cotação")',
+  },
+  {
+    testId: 'lista-filtro-input',
+    css: 'label:has-text("Filtrar cotações") ~ input, .v-text-field:has-text("Filtrar cotações") input',
+  },
+  {
+    testId: 'lista-filtro-buscar',
+    css: 'button:has(.mdi-magnify)',
+  },
+  {
+    testId: 'lista-filtro-andamento',
+    css: 'button:has-text("Cotações em andamento")',
+  },
+  {
+    testId: 'lista-cotacao-link',
+    css: 'td span.primary--text, span.text-caption.primary--text',
+    all: true,
+  },
+]
+
 export const TESTID_SURFACES: Record<TestIdSurface, TestIdRule[]> = {
   detalhes: DETALHES_RULES,
   item: ITEM_RULES,
   documentos: DOCUMENTOS_RULES,
   colaboradores: COLABORADORES_RULES,
   direta: DIRETA_RULES,
+  'adicionar-item': ADICIONAR_ITEM_RULES,
+  expressa: EXPRESSA_RULES,
+  lista: LISTA_RULES,
 }
 
 export function isInjectTestIdsEnabled(): boolean {

@@ -1,0 +1,373 @@
+import type { Page, Route, Request } from '@playwright/test'
+import {
+  buildDetalhesSessionUser,
+  buildGetPricesResponse,
+  DETALHES_FIXTURE_IDS,
+  ITEM_FIXTURE_IDS,
+} from '../fixtures/factories'
+import { maybeInjectTestIds } from './inject-testids'
+
+type InterceptFn = (options: {
+  method?: string
+  url: string
+  fulfillResponse?: { status?: number; body?: unknown }
+  handler?: (route: Route, request: Request) => Promise<void> | void
+}) => Promise<{
+  status: number
+  responseJson: unknown
+  requestJson: unknown
+}>
+
+export const FLOW_FIXTURE_IDS = {
+  COTACAO_ID: DETALHES_FIXTURE_IDS.COTACAO_ID,
+  ITEM_ID: ITEM_FIXTURE_IDS.ITEM_ID,
+  LIST_COTACAO_ID: DETALHES_FIXTURE_IDS.COTACAO_ID,
+} as const
+
+async function stubCommonAuth(interceptNetworkCall: InterceptFn) {
+  const sessionCall = interceptNetworkCall({
+    url: '**/api/check-session**',
+    fulfillResponse: { status: 200, body: buildDetalhesSessionUser() },
+  })
+  const permissionsCall = interceptNetworkCall({
+    url: '**/api/permissions-config/**',
+    fulfillResponse: {
+      status: 200,
+      body: { cotacoes: ['quotation.cotacoes'] },
+    },
+  })
+  const preferencesCall = interceptNetworkCall({
+    url: '**/api/config/preferences**',
+    fulfillResponse: {
+      status: 200,
+      body: { decimal_places: 2, item_formula: 2 },
+    },
+  })
+  const photoCall = interceptNetworkCall({
+    url: '**/api/config/users/photo-me**',
+    fulfillResponse: { status: 200, body: { photo: null } },
+  })
+  return { sessionCall, permissionsCall, preferencesCall, photoCall }
+}
+
+/** Minimal `/api/filtros/` body so Expressa Filtros + UF selects mount. */
+export function buildExpressaFiltrosBody() {
+  return {
+    bases: [
+      { name: 'Comprasnet', value: 'Comprasnet' },
+      { name: 'BPS', value: "('gov_bps','BPS')" },
+    ],
+    bases_tabulares: ['Comprasnet', "('gov_bps','BPS')"],
+    ufs: [{ name: 'São Paulo', value: 'SP' }],
+    municipios: [],
+    periodo: [
+      { name: 'Últimos 12 meses', value: 12 },
+      { name: 'Personalizado', value: 0 },
+    ],
+    periodoTenYears: [{ name: 'Últimos 10 anos', value: 120 }],
+    tenantsTenYears: [],
+    tenantsImageBasedSearch: [],
+    tenantsIaBasedSearch: [],
+    basesGeralPropostasInicialEFinal: [],
+    flags: { suggestion: 'false' },
+  }
+}
+
+export function buildExpressaSearchHit(
+  overrides: Partial<{
+    termo_id: number
+    descricao: string
+    valor_unitario: string
+  }> = {},
+) {
+  return {
+    termo_id: overrides.termo_id ?? 55001,
+    descricao: overrides.descricao ?? 'Caneta Azul Homologada E2E',
+    descricao_limit_15: 'Caneta Azul...',
+    objeto: 'Material de escritório',
+    valor_unitario: overrides.valor_unitario ?? '10,00',
+    quant: 10,
+    uf: 'SP',
+    dt_homologacao: '15/01/2025',
+    base: 'comprasnet',
+    uasg_name: 'UASG E2E',
+    marca: 'Bic',
+    fornecedor_cnpj: '12345678000199',
+  }
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/detalhes/adicionar-item/:id`. */
+export async function stubAdicionarItemPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: { cotacaoId?: string; cotacaoNome?: string } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Adicionar Item'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  interceptNetworkCall({
+    url: '**/api/filtros**',
+    fulfillResponse: {
+      status: 200,
+      body: { ufs: [{ name: 'São Paulo', value: 'SP' }], bases_tabulares: [] },
+    },
+  })
+
+  const getCotacaoCall = interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao/${cotacaoId}`,
+    fulfillResponse: {
+      status: 200,
+      body: {
+        id: cotacaoId,
+        nome: cotacaoNome,
+        codigo: 'COT-E2E-ADD',
+      },
+    },
+  })
+  // Trailing-slash variant used by some clients
+  interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao/${cotacaoId}/`,
+    fulfillResponse: {
+      status: 200,
+      body: {
+        id: cotacaoId,
+        nome: cotacaoNome,
+        codigo: 'COT-E2E-ADD',
+      },
+    },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/v3/cotacao/cotacoes/unit**',
+    fulfillResponse: {
+      status: 200,
+      body: { units: [{ unidade: 'UN', descricao: 'Unidade' }] },
+    },
+  })
+
+  interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/lotes/**`,
+    fulfillResponse: {
+      status: 200,
+      body: [{ id: DETALHES_FIXTURE_IDS.LOTE_ID, nome: 'LOTE', ordem: 1 }],
+    },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/modelos-de-justificativas**',
+    fulfillResponse: { status: 200, body: { modelos: [] } },
+  })
+
+  return { cotacaoId, cotacaoNome, getCotacaoCall, ...auth }
+}
+
+export async function gotoAdicionarItemPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+) {
+  await page.goto(
+    `/v2/cotacao/cotacoes/detalhes/adicionar-item/${cotacaoId}`,
+    { timeout: 90_000 },
+  )
+  await maybeInjectTestIds(page, 'adicionar-item')
+}
+
+/** Stubs for `/v2/cotacoes/expressa?quotation=&quotation_item=`. */
+export async function stubExpressaPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: {
+    cotacaoId?: string | number
+    itemId?: number
+    itemNome?: string
+    cotacaoNome?: string
+  } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? ITEM_FIXTURE_IDS.COTACAO_ID
+  const itemId = overrides.itemId ?? FLOW_FIXTURE_IDS.ITEM_ID
+  const itemNome = overrides.itemNome ?? 'Caneta Esferográfica Azul'
+  const cotacaoNome =
+    overrides.cotacaoNome ?? 'Cotação E2E Material de Escritório'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  const filtrosBody = buildExpressaFiltrosBody()
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: filtrosBody },
+  })
+  interceptNetworkCall({
+    url: '**/api/filtros',
+    fulfillResponse: { status: 200, body: filtrosBody },
+  })
+
+  const getPricesBody = buildGetPricesResponse({
+    itemId,
+    cotacaoId: Number(cotacaoId) || ITEM_FIXTURE_IDS.COTACAO_ID,
+    itemNome,
+    cotacaoNome,
+  })
+
+  const getPricesCall = interceptNetworkCall({
+    url: `**/api/v3/cotacao-item/${itemId}/get-prices/**`,
+    fulfillResponse: { status: 200, body: getPricesBody },
+  })
+
+  const getItemCall = interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao-item/${itemId}/`,
+    fulfillResponse: {
+      status: 200,
+      body: {
+        id: itemId,
+        nome: itemNome,
+        descricao: 'Item de teste E2E',
+        quant: 100,
+        unidade: 'UN',
+        position: 1,
+        cotacao: { id: cotacaoId, nome: cotacaoNome },
+      },
+    },
+  })
+  interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao-item/${itemId}`,
+    fulfillResponse: {
+      status: 200,
+      body: {
+        id: itemId,
+        nome: itemNome,
+        descricao: 'Item de teste E2E',
+        quant: 100,
+        unidade: 'UN',
+        position: 1,
+        cotacao: { id: cotacaoId, nome: cotacaoNome },
+      },
+    },
+  })
+
+  const searchHit = buildExpressaSearchHit()
+  const searchCall = interceptNetworkCall({
+    url: '**/api/expressa/search/page**',
+    fulfillResponse: {
+      status: 200,
+      body: {
+        result: [searchHit],
+        total_hits: 1,
+        total_pages: 1,
+      },
+    },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/expressa/search/advanced/**',
+    fulfillResponse: {
+      status: 200,
+      body: {
+        status: true,
+        quantMax: [1, 100],
+        valorMax: [1, 1000],
+      },
+    },
+  })
+
+  return {
+    cotacaoId: String(cotacaoId),
+    itemId,
+    itemNome,
+    cotacaoNome,
+    searchHit,
+    getItemCall,
+    getPricesCall,
+    searchCall,
+    getPricesBody,
+    ...auth,
+  }
+}
+
+export async function gotoExpressaPage(
+  page: Page,
+  options: { cotacaoId?: string | number; itemId?: number } = {},
+) {
+  const cotacaoId = options.cotacaoId ?? ITEM_FIXTURE_IDS.COTACAO_ID
+  const itemId = options.itemId ?? FLOW_FIXTURE_IDS.ITEM_ID
+  await page.goto(
+    `/v2/cotacoes/expressa?quotation=${cotacaoId}&quotation_item=${itemId}`,
+    { timeout: 90_000 },
+  )
+  await maybeInjectTestIds(page, 'expressa')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes` list. */
+export async function stubListaCotacoesPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: {
+    cotacaoId?: string
+    cotacaoNome?: string
+  } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.LIST_COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Lista Principal'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: { bases_tabulares: [] } },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/v3/cotacao/valid-user**',
+    fulfillResponse: { status: 200, body: { valid_user: true } },
+  })
+
+  interceptNetworkCall({
+    url: '**/cotacao/cotacoes/compartilhadas/mensagem**',
+    fulfillResponse: { status: 200, body: { mensagem: '' } },
+  })
+  interceptNetworkCall({
+    url: '**/cotacao/cotacoes/compartilhadas_api**',
+    fulfillResponse: { status: 200, body: { results: [] } },
+  })
+
+  const listItem = {
+    id: cotacaoId,
+    nome: cotacaoNome,
+    dt_cotacao: '2026-09-01T12:00:00Z',
+    itens_count: 2,
+    mean_price: null,
+    personalizada: false,
+    ativo: true,
+    user: { name: 'E2E Tester' },
+  }
+
+  const getListCall = interceptNetworkCall({
+    method: 'GET',
+    url: '**/api/v3/cotacao?**',
+    fulfillResponse: {
+      status: 200,
+      body: {
+        count: 1,
+        results: [listItem],
+      },
+    },
+  })
+  // Some clients hit without query on first paint
+  interceptNetworkCall({
+    method: 'GET',
+    url: '**/api/v3/cotacao',
+    fulfillResponse: {
+      status: 200,
+      body: {
+        count: 1,
+        results: [listItem],
+      },
+    },
+  })
+
+  return { cotacaoId, cotacaoNome, listItem, getListCall, ...auth }
+}
+
+export async function gotoListaCotacoesPage(page: Page) {
+  await page.goto('/v2/cotacao/cotacoes', { timeout: 90_000 })
+  await maybeInjectTestIds(page, 'lista')
+}

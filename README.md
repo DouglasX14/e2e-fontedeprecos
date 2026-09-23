@@ -122,6 +122,7 @@ yarn test:e2e:cotacao-v2:stable
 | `cotacao-detalhes-v2-personalizada.spec.ts` | Personalizada / IA / capacity |
 | `cotacao-detalhes-v2-navegacao.spec.ts` | Ações → satellites |
 | `cotacao-satellites-v2.spec.ts` | Documentos, colaboradores, direta |
+| `cotacao-flow-v2.spec.ts` | Adicionar item, Expressa, lista de cotações |
 | `example-*.spec.ts` | Exemplos de scaffold |
 
 ## Arquitetura
