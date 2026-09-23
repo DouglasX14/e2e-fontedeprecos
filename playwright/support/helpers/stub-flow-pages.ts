@@ -593,3 +593,148 @@ export async function gotoIaPage(
   })
   await maybeInjectTestIds(page, 'ia')
 }
+
+/** Stubs for `/v2/cotacao/cotacoes/compartilhar/:id`. */
+export async function stubCompartilharPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: { cotacaoId?: string; cotacaoNome?: string } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Compartilhar'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: { bases_tabulares: [] } },
+  })
+
+  const getItensBody = buildGetItensResponse({ cotacaoId, cotacaoNome })
+  const getItensCall = interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/itens**`,
+    fulfillResponse: { status: 200, body: getItensBody },
+  })
+
+  return { cotacaoId, cotacaoNome, getItensCall, ...auth }
+}
+
+export async function gotoCompartilharPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+) {
+  await page.goto(`/v2/cotacao/cotacoes/compartilhar/${cotacaoId}`, {
+    timeout: 90_000,
+  })
+  await maybeInjectTestIds(page, 'compartilhar')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/editar/:id`. */
+export async function stubEditarCotacaoPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: { cotacaoId?: string; cotacaoNome?: string } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Editar'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: { bases_tabulares: [] } },
+  })
+
+  const cotacaoBody = {
+    id: cotacaoId,
+    nome: cotacaoNome,
+    obs: 'Obs inicial E2E',
+    personalizada: false,
+    dt_cotacao: '2026-09-01T12:00:00Z',
+    user: { name: 'E2E Tester' },
+    usuario_contato: { nome: '', email: '', telefone: '' },
+    propostas_existentes: [],
+  }
+
+  const getCotacaoCall = interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao/${cotacaoId}`,
+    fulfillResponse: { status: 200, body: cotacaoBody },
+  })
+  interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao/${cotacaoId}/`,
+    fulfillResponse: { status: 200, body: cotacaoBody },
+  })
+
+  return { cotacaoId, cotacaoNome, getCotacaoCall, ...auth }
+}
+
+export async function gotoEditarCotacaoPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+) {
+  await page.goto(`/v2/cotacao/cotacoes/editar/${cotacaoId}`, {
+    timeout: 90_000,
+  })
+  await maybeInjectTestIds(page, 'editar-cotacao')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/relatorio-gerencial` (admin). */
+export async function stubRelatorioGerencialPageApis(
+  interceptNetworkCall: InterceptFn,
+) {
+  const auth = await stubCommonAuth(interceptNetworkCall, {
+    sessionBody: buildDetalhesSessionUser({
+      groups: [{ name: 'Administrador' }],
+    }),
+  })
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: { bases_tabulares: [] } },
+  })
+
+  const reportBody = {
+    kpis: {
+      criadas: 12,
+      em_andamento: 5,
+      finalizadas: 6,
+      excluidas: 1,
+      usuarios_ativos: 3,
+      total_itens: 40,
+    },
+    usuarios_filtro: [{ id: 701, name: 'E2E Tester' }],
+    resumo: {
+      count: 1,
+      results: [
+        {
+          user_id: 701,
+          nome: 'E2E Tester',
+          cotacoes: 12,
+          itens: 40,
+          em_andamento: 5,
+          finalizadas: 6,
+          excluidas: 1,
+          ultima_cotacao: '2026-09-20T12:00:00Z',
+        },
+      ],
+    },
+    graficos: {
+      por_usuario: [{ label: 'E2E Tester', value: 12 }],
+      evolucao: [{ label: '2026-09-01', value: 4 }],
+    },
+    filtros: {},
+  }
+
+  const getReportCall = interceptNetworkCall({
+    method: 'GET',
+    url: '**/api/v3/cotacao/relatorio-gerencial/**',
+    fulfillResponse: { status: 200, body: reportBody },
+  })
+
+  return { getReportCall, reportBody, ...auth }
+}
+
+export async function gotoRelatorioGerencialPage(page: Page) {
+  await page.goto('/v2/cotacao/cotacoes/relatorio-gerencial', {
+    timeout: 90_000,
+  })
+  await maybeInjectTestIds(page, 'relatorio-gerencial')
+}

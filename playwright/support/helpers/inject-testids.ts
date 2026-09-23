@@ -28,6 +28,9 @@ export type TestIdSurface =
   | 'lista'
   | 'importar-itens'
   | 'ia'
+  | 'compartilhar'
+  | 'editar-cotacao'
+  | 'relatorio-gerencial'
 
 const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light' },
@@ -352,6 +355,61 @@ const IA_RULES: TestIdRule[] = [
   },
 ]
 
+const COMPARTILHAR_RULES: TestIdRule[] = [
+  { testId: 'compartilhar-page', css: 'main .v-card, main' },
+  {
+    testId: 'compartilhar-cotacao-nome',
+    css: 'main p.text-h5, main .text-h5',
+  },
+  {
+    testId: 'compartilhar-email',
+    css: 'label:has-text("Email") ~ .v-input input, .v-text-field input[placeholder*="Email"]',
+  },
+  {
+    testId: 'compartilhar-obs',
+    css: 'label:has-text("Observações") ~ .v-input textarea, .v-textarea textarea',
+  },
+  { testId: 'compartilhar-submit', css: 'button:has-text("Compartilhar")' },
+  { testId: 'compartilhar-cancelar', css: 'button:has-text("Cancelar")' },
+]
+
+const EDITAR_COTACAO_RULES: TestIdRule[] = [
+  { testId: 'editar-cotacao-page', css: 'main .v-card.w-full, main .v-card' },
+  {
+    testId: 'editar-cotacao-nome',
+    css: 'label:has-text("Nome da Cotação") ~ input, .v-text-field:has-text("Nome da Cotação") input',
+  },
+  {
+    testId: 'editar-cotacao-obs',
+    css: 'label:has-text("Observações") ~ textarea, .v-textarea:has-text("Observações") textarea',
+  },
+  { testId: 'editar-cotacao-submit', css: 'button:has-text("Salvar")' },
+  {
+    testId: 'editar-cotacao-voltar',
+    css: 'a:has-text("Voltar"), button:has-text("Voltar")',
+  },
+]
+
+const RELATORIO_GERENCIAL_RULES: TestIdRule[] = [
+  { testId: 'relatorio-gerencial-page', css: 'main .filter-card, main' },
+  {
+    testId: 'relatorio-gerencial-aplicar',
+    css: 'button:has-text("Aplicar filtros"), button:has-text("Aplicar")',
+  },
+  {
+    testId: 'relatorio-gerencial-exportar',
+    css: 'button:has-text("Exportar")',
+  },
+  {
+    testId: 'relatorio-gerencial-kpis',
+    css: '.kpi-grid, .kpi-card',
+  },
+  {
+    testId: 'relatorio-gerencial-tabela',
+    css: 'main .v-data-table, main .v-card:has-text("Resumo por usuário")',
+  },
+]
+
 export const TESTID_SURFACES: Record<TestIdSurface, TestIdRule[]> = {
   detalhes: DETALHES_RULES,
   item: ITEM_RULES,
@@ -364,6 +422,9 @@ export const TESTID_SURFACES: Record<TestIdSurface, TestIdRule[]> = {
   lista: LISTA_RULES,
   'importar-itens': IMPORTAR_ITENS_RULES,
   ia: IA_RULES,
+  compartilhar: COMPARTILHAR_RULES,
+  'editar-cotacao': EDITAR_COTACAO_RULES,
+  'relatorio-gerencial': RELATORIO_GERENCIAL_RULES,
 }
 
 export function isInjectTestIdsEnabled(): boolean {

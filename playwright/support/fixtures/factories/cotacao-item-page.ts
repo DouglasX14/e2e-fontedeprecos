@@ -20,6 +20,7 @@ export type SessionUserOverrides = Partial<{
   permissions: string[]
   acesso_cotacao_ia: boolean
   equipe_fonte: boolean
+  groups: Array<{ name: string }>
 }>
 
 /** Session payload returned by `/api/check-session`. */
@@ -34,7 +35,7 @@ export function buildSessionUser(overrides: SessionUserOverrides = {}) {
       preferences: { decimal_places: 2 },
       plan: { name: 'PROFESSIONAL', years_filter_limit: null },
     },
-    groups: [],
+    groups: overrides.groups ?? [],
     permissions: overrides.permissions ?? [
       'quotation.cotacoes',
       'quotation.detalhes_cotacoes',

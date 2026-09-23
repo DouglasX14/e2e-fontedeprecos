@@ -1,17 +1,23 @@
 import { test, expect, log } from '../support/merged-fixtures'
 import {
   gotoAdicionarItemPage,
+  gotoCompartilharPage,
+  gotoEditarCotacaoPage,
   gotoEditarItemPage,
   gotoExpressaPage,
   gotoIaPage,
   gotoImportarItensPage,
   gotoListaCotacoesPage,
+  gotoRelatorioGerencialPage,
   stubAdicionarItemPageApis,
+  stubCompartilharPageApis,
+  stubEditarCotacaoPageApis,
   stubEditarItemPageApis,
   stubExpressaPageApis,
   stubIaPageApis,
   stubImportarItensPageApis,
   stubListaCotacoesPageApis,
+  stubRelatorioGerencialPageApis,
 } from '../support/helpers/stub-flow-pages'
 import { maybeInjectTestIds } from '../support/helpers/inject-testids'
 
@@ -294,5 +300,116 @@ test.describe('Cotação IA — /v2/cotacao/cotacoes/detalhes/:id/ia', () => {
     )
     await expect(page.getByTestId('ia-itens-panel')).toBeVisible()
     await expect(page.getByText('Caneta Esferográfica Azul')).toBeVisible()
+  })
+})
+
+test.describe('Compartilhar — /v2/cotacao/cotacoes/compartilhar/:id', () => {
+  test('[P0] compartilha cotação por email', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub compartilhar + lista destino')
+    const stubs = await stubCompartilharPageApis(interceptNetworkCall)
+    await stubListaCotacoesPageApis(interceptNetworkCall)
+
+    const shareCall = interceptNetworkCall({
+      method: 'POST',
+      url: `**/cotacao/cotacoes/${stubs.cotacaoId}/compartilhar**`,
+      fulfillResponse: { status: 200, body: { ok: true } },
+    })
+
+    await gotoCompartilharPage(page, stubs.cotacaoId)
+    await stubs.getItensCall
+
+    await log.step('Fill email and submit')
+    await expect(page.getByTestId('compartilhar-page')).toBeVisible()
+    await expect(page.getByTestId('compartilhar-cotacao-nome')).toContainText(
+      stubs.cotacaoNome,
+      { timeout: 30_000 },
+    )
+    await page.getByTestId('compartilhar-email').fill('qa@fontedeprecos.test')
+    await page.getByTestId('compartilhar-obs').fill('Compartilhamento E2E')
+    await page.getByTestId('compartilhar-submit').click()
+
+    const { status, requestJson } = await shareCall
+    expect(status).toBe(200)
+    expect(requestJson).toMatchObject({
+      email: 'qa@fontedeprecos.test',
+      notes: 'Compartilhamento E2E',
+    })
+    await expect(page).toHaveURL(/\/v2\/cotacao\/cotacoes\/?$/)
+  })
+})
+
+test.describe('Editar cotação — /v2/cotacao/cotacoes/editar/:id', () => {
+  test('[P0] altera nome e salva', async ({ page, interceptNetworkCall }) => {
+    await log.step('Stub editar cotação')
+    const stubs = await stubEditarCotacaoPageApis(interceptNetworkCall)
+
+    const updateCall = interceptNetworkCall({
+      method: 'POST',
+      url: `**/api/v3/cotacao/${stubs.cotacaoId}/update/**`,
+      fulfillResponse: {
+        status: 200,
+        body: { detail: 'Cotação atualizada com sucesso.', id: stubs.cotacaoId },
+      },
+    })
+
+    interceptNetworkCall({
+      url: `**/api/v3/cotacao/${stubs.cotacaoId}/itens**`,
+      fulfillResponse: {
+        status: 200,
+        body: {
+          cotacao: { id: stubs.cotacaoId, nome: stubs.cotacaoNome },
+          itens: [],
+          lotes: [],
+        },
+      },
+    })
+
+    await gotoEditarCotacaoPage(page, stubs.cotacaoId)
+    await stubs.getCotacaoCall
+
+    await log.step('Assert form and save')
+    await expect(page.getByTestId('editar-cotacao-page')).toBeVisible()
+    await expect(page.getByTestId('editar-cotacao-nome')).toHaveValue(
+      stubs.cotacaoNome,
+      { timeout: 30_000 },
+    )
+    await page.getByTestId('editar-cotacao-nome').fill('Cotação E2E Renomeada')
+    await page.getByTestId('editar-cotacao-submit').click()
+
+    const { status } = await updateCall
+    expect(status).toBe(200)
+    await expect(page).toHaveURL(
+      new RegExp(`/v2/cotacao/cotacoes/detalhes/${stubs.cotacaoId}`),
+    )
+  })
+})
+
+test.describe('Relatório gerencial — /v2/cotacao/cotacoes/relatorio-gerencial', () => {
+  test('[P0] carrega KPIs e resumo para admin', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub relatório gerencial (admin)')
+    const stubs = await stubRelatorioGerencialPageApis(interceptNetworkCall)
+
+    await gotoRelatorioGerencialPage(page)
+    await stubs.getReportCall
+
+    await log.step('Assert dashboard')
+    await expect(page.getByTestId('relatorio-gerencial-page')).toBeVisible()
+    await maybeInjectTestIds(page, 'relatorio-gerencial')
+    await expect(page.getByTestId('relatorio-gerencial-aplicar')).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(page.getByTestId('relatorio-gerencial-kpis')).toBeVisible()
+    await expect(page.getByText('Cotações criadas')).toBeVisible()
+    await expect(page.getByTestId('relatorio-gerencial-tabela')).toBeVisible()
+    await expect(
+      page.getByTestId('relatorio-gerencial-tabela').getByText('E2E Tester'),
+    ).toBeVisible()
+    await expect(page.getByTestId('relatorio-gerencial-exportar')).toBeVisible()
   })
 })
