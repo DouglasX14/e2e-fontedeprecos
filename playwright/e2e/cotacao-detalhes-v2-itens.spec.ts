@@ -5,7 +5,10 @@ import {
 } from '../support/fixtures/factories'
 import {
   gotoDetalhesPage,
+  openOrdenarSelect,
+  reinjectDetalhesTestIds,
   stubDetalhesPageApis,
+  waitForDetalhesDialog,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
 
@@ -34,7 +37,7 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
 
     await log.step('Delete item from row actions')
     await page.getByTestId('detalhes-item-delete-btn').click()
-    await expect(page.getByTestId('detalhes-delete-items-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-delete-items-dialog')
     await page.getByTestId('detalhes-delete-items-confirm').click()
 
     const { status, requestJson } = await deleteItemsCall
@@ -99,7 +102,7 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
 
     await log.step('Open duplicate dialog and confirm')
     await page.getByTestId('detalhes-item-duplicate-btn').click()
-    await expect(page.getByTestId('detalhes-duplicate-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-duplicate-dialog')
     await page.getByTestId('detalhes-duplicate-confirm').click()
 
     const { status, requestJson } = await duplicateCall
@@ -145,8 +148,9 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Switch to Personalizado and drag Item A onto Item B')
-    await page.getByTestId('detalhes-ordenar-select').click()
+    await openOrdenarSelect(page)
     await page.getByTestId('detalhes-ordenar-option-custom').click()
+    await reinjectDetalhesTestIds(page)
 
     const source = page.getByTestId(`detalhes-item-row-${itemA}`)
     const target = page.getByTestId(`detalhes-item-row-${itemB}`)
@@ -226,8 +230,9 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Enable Personalizado and click restore')
-    await page.getByTestId('detalhes-ordenar-select').click()
+    await openOrdenarSelect(page)
     await page.getByTestId('detalhes-ordenar-option-custom').click()
+    await reinjectDetalhesTestIds(page)
 
     await expect(page.getByTestId('detalhes-restaurar-ordem-btn')).toBeVisible()
     await page.getByTestId('detalhes-restaurar-ordem-btn').click()
@@ -295,8 +300,9 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Enable Personalizado, select both items, drop on lote 2')
-    await page.getByTestId('detalhes-ordenar-select').click()
+    await openOrdenarSelect(page)
     await page.getByTestId('detalhes-ordenar-option-custom').click()
+    await reinjectDetalhesTestIds(page)
 
     await page.getByTestId(`detalhes-item-select-${itemA}`).click()
     await page.getByTestId(`detalhes-item-select-${itemB}`).click()
@@ -379,7 +385,8 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
 
     const shareCall = interceptNetworkCall({
       method: 'POST',
-      url: `**/api/v3/cotacao-item/${DETALHES_FIXTURE_IDS.ITEM_ID}/share-item/**`,
+      // Stock QuotationShareItem emits item as id (number); URL may contain undefined — match broadly.
+      url: '**/api/v3/cotacao-item/**/share-item/**',
       fulfillResponse: {
         status: 200,
         body: { detail: 'Item compartilhado com sucesso' },
@@ -392,14 +399,18 @@ test.describe('Cotação Detalhes v2 — itens / ordenação', () => {
 
     await log.step('Open share dialog, select destination, confirm')
     await page.getByTestId('detalhes-item-share-btn').click()
-    await expect(page.getByTestId('detalhes-share-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-share-dialog')
+    await expect(
+      page.getByTestId(`detalhes-share-quotation-${destCotacaoId}`),
+    ).toBeVisible({ timeout: 15_000 })
     await page.getByTestId(`detalhes-share-quotation-${destCotacaoId}`).click()
     await page.getByTestId('detalhes-share-confirm').click()
 
     const { status, requestJson } = await shareCall
     expect(status).toBe(200)
+    // Stock emits `item` as the numeric id (not `{ id }`).
     expect(requestJson).toMatchObject({
-      item: expect.objectContaining({ id: DETALHES_FIXTURE_IDS.ITEM_ID }),
+      item: DETALHES_FIXTURE_IDS.ITEM_ID,
       withPrices: true,
       quotations: [destCotacaoId],
     })

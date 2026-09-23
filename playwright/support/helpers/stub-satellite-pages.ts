@@ -5,7 +5,7 @@ import {
   DETALHES_FIXTURE_IDS,
   type GetItensOverrides,
 } from '../fixtures/factories/cotacao-detalhes-page'
-import { maybeInjectTestIds } from './inject-testids'
+import { maybeInjectTestIds, maybeInjectDocumentosTrOptions, maybeInjectDiretaSelectOptions } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -142,6 +142,12 @@ export async function gotoDocumentosPage(
   await maybeInjectTestIds(page, 'documentos')
 }
 
+/** Open TR autocomplete and inject option testids. */
+export async function openDocumentosTrSelect(page: Page) {
+  await page.getByTestId('documentos-tr-select').click()
+  await maybeInjectDocumentosTrOptions(page)
+}
+
 /** Stubs for `/v2/cotacoes/:id/selecionar-colaboradores`. */
 export async function stubColaboradoresPageApis(
   interceptNetworkCall: InterceptFn,
@@ -270,6 +276,18 @@ export async function gotoDiretaPage(
     timeout: 90_000,
   })
   await maybeInjectTestIds(page, 'direta')
+}
+
+/** Open fornecedor autocomplete and inject option testids. */
+export async function openDiretaFornecedorSelect(page: Page) {
+  await page.getByTestId('direta-fornecedor-select').click()
+  await maybeInjectDiretaSelectOptions(page)
+}
+
+/** Open unidade select and inject UN option. */
+export async function openDiretaUnidadeSelect(page: Page) {
+  await page.getByTestId('direta-unidade-select').click()
+  await maybeInjectDiretaSelectOptions(page)
 }
 
 export { DETALHES_FIXTURE_IDS }

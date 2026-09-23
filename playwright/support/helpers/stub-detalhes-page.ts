@@ -6,7 +6,7 @@ import {
   DETALHES_FIXTURE_IDS,
   type GetItensOverrides,
 } from '../fixtures/factories/cotacao-detalhes-page'
-import { maybeInjectDetalhesMenuActions, maybeInjectTestIds } from './inject-testids'
+import { maybeInjectDetalhesMenuActions, maybeInjectDetalhesLoteMenuActions, maybeInjectDetalhesOrdenarOptions, maybeInjectTestIds, maybeReinjectDetalhesTestIds } from './inject-testids'
 
 type InterceptFn = (options: {
   method?: string
@@ -169,12 +169,39 @@ export async function waitForDetalhesPageReady(page: Page) {
   await page
     .locator('.tr_overlay.v-overlay--active')
     .waitFor({ state: 'hidden' })
+  // Re-inject after table paint (row actions / lote cards).
+  await maybeReinjectDetalhesTestIds(page)
 }
 
 /** Open Ações menu and inject menu item testids when INJECT_TESTIDS=1. */
 export async function openAcoesMenu(page: Page) {
   await page.getByTestId('detalhes-acoes-menu').click()
   await maybeInjectDetalhesMenuActions(page)
+}
+
+/** Open lote ⋮ menu and inject Editar/Excluir actions. */
+export async function openLoteMenu(page: Page, loteId: number | string) {
+  await page.getByTestId(`detalhes-lote-menu-${loteId}`).click()
+  await maybeInjectDetalhesLoteMenuActions(page)
+}
+
+/** Open Ordenar por and inject Personalizado option. */
+export async function openOrdenarSelect(page: Page) {
+  await page.getByTestId('detalhes-ordenar-select').click()
+  await maybeInjectDetalhesOrdenarOptions(page)
+}
+
+/** Re-inject after opening a dialog / mutating lote UI. */
+export async function reinjectDetalhesTestIds(page: Page) {
+  await maybeReinjectDetalhesTestIds(page)
+}
+
+/** Wait for a dialog, map testids, assert target visible. */
+export async function waitForDetalhesDialog(page: Page, testId: string) {
+  const dialog = page.getByRole('dialog').or(page.locator('.v-dialog__content--active'))
+  await dialog.first().waitFor({ state: 'visible' })
+  await reinjectDetalhesTestIds(page)
+  await page.getByTestId(testId).first().waitFor({ state: 'visible' })
 }
 
 export { DETALHES_FIXTURE_IDS }

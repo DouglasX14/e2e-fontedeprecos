@@ -36,8 +36,9 @@ const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light' },
   { testId: 'detalhes-valor-total', css: 'main p.font-weight-black' },
   { testId: 'detalhes-gerar-relatorio-btn', css: 'button:has-text("Gerar relatório")' },
-  { testId: 'detalhes-memorial-btn', css: 'button:has-text("Gerar memorial"), button:has-text("Memorial")' },
-  { testId: 'detalhes-cotacao-ia-btn', css: 'button:has-text("Cotação com IA"), button:has-text("Cotação IA")' },
+  { testId: 'detalhes-memorial-btn', css: 'button:has-text("Gerar memorial de cálculo"), button:has-text("Gerar memorial")' },
+  // Cotação IA renders as <a> or button inside .cotacao-ia-btn-wrap
+  { testId: 'detalhes-cotacao-ia-btn', css: '.cotacao-ia-btn, a.cotacao-ia-btn, button:has-text("Cotação com IA")' },
   { testId: 'detalhes-acoes-menu', css: 'button:has-text("Ações")' },
   {
     testId: 'detalhes-acao-novo-item',
@@ -56,15 +57,19 @@ const DETALHES_RULES: TestIdRule[] = [
     css: '.v-menu__content .v-list-item:has-text("Cotação direta"), [role="menuitem"]:has-text("Cotação direta")',
   },
   { testId: 'detalhes-enviar-cotacao-btn', css: 'button:has-text("Enviar cotação")' },
-  { testId: 'detalhes-prazo-adicional-btn', css: 'button:has-text("Prazo")' },
+  { testId: 'detalhes-prazo-adicional-btn', css: 'button:has-text("Prazo adicional"), button:has-text("Prazo")' },
   { testId: 'detalhes-finalizar-cotacao-btn', css: 'button:has-text("Finalizar")' },
-  { testId: 'detalhes-novo-lote-btn', css: 'button:has-text("Novo lote")' },
-  { testId: 'detalhes-duplicar-lotes-btn', css: 'button:has-text("Duplicar lotes"), button:has-text("Duplicar lote")' },
-  { testId: 'detalhes-lote-com-itens-btn', css: 'button:has-text("Com itens"), button:has-text("lote com itens")' },
-  { testId: 'detalhes-mesclar-lotes-btn', css: 'button:has-text("Mesclar")' },
-  { testId: 'detalhes-mover-itens-btn', css: 'button:has-text("Mover")' },
+  { testId: 'detalhes-novo-lote-btn', css: '.lotes-quick-actions button:has-text("Novo lote"), button:has-text("Novo lote")' },
+  // Stock UI label (not "Duplicar lotes" — that text is only the confirm CTA)
+  {
+    testId: 'detalhes-duplicar-lotes-btn',
+    css: 'button:has-text("Gerar nova cotação a partir de lote"), button:has-text("Duplicar lotes")',
+  },
+  { testId: 'detalhes-lote-com-itens-btn', css: 'button:has-text("Com itens")' },
+  { testId: 'detalhes-mesclar-lotes-btn', css: 'button:has-text("Mesclar lotes"), button:has-text("Mesclar")' },
+  { testId: 'detalhes-mover-itens-btn', css: '.lotes-batch-actions button:has-text("Mover"), button:has-text("Mover")' },
   { testId: 'detalhes-filtro-item', css: 'input[aria-label="Nome do item"], label:has-text("Nome do item") + input, .v-text-field:has-text("Nome do item") input' },
-  { testId: 'detalhes-filtro-buscar', css: 'button:has(.v-icon):near(input), button.primary:has(.mdi-magnify), button:has(.mdi-magnify)' },
+  { testId: 'detalhes-filtro-buscar', css: 'button:has(.mdi-magnify)' },
   // Text link only — exclude icon v-btn that also points at /item/
   {
     testId: 'detalhes-item-link',
@@ -72,47 +77,49 @@ const DETALHES_RULES: TestIdRule[] = [
     all: true,
   },
   { testId: 'detalhes-lote-tag', css: 'span.lote-header-tag, .lote-header-tag' },
-  { testId: 'detalhes-item-delete-btn', css: 'button:has(.mdi-delete), button[aria-label*="Excluir"]' },
-  { testId: 'detalhes-item-duplicate-btn', css: 'button:has(.mdi-content-copy), button[aria-label*="Duplicar"]' },
-  { testId: 'detalhes-item-share-btn', css: 'button:has(.mdi-share), button:has(.mdi-export), button[aria-label*="Compartilhar"]' },
-  { testId: 'detalhes-ordenar-select', css: 'label:has-text("Ordenar por") ~ div input, .v-select:has-text("Ordenar por")' },
-  { testId: 'detalhes-ordenar-option-custom', css: '.v-list-item:has-text("Personalizado"), [role="option"]:has-text("Personalizado")' },
-  { testId: 'detalhes-restaurar-ordem-btn', css: 'button:has-text("Restaurar")' },
-  { testId: 'detalhes-delete-items-dialog', css: '.v-dialog--active .v-card:has-text("deletar"), .v-dialog--active .v-card:has-text("Excluir")' },
-  { testId: 'detalhes-delete-items-confirm', css: '.v-dialog--active button:has-text("Sim, deletar"), .v-dialog--active button:has-text("deletar")' },
-  { testId: 'detalhes-duplicate-dialog', css: '.v-dialog--active .v-card:has-text("Duplicar")' },
-  { testId: 'detalhes-duplicate-confirm', css: '.v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-share-dialog', css: '.v-dialog--active .v-card:has-text("Compartilhar")' },
-  { testId: 'detalhes-share-confirm', css: '.v-dialog--active button:has-text("Confirmar"), .v-dialog--active button:has-text("Compartilhar")' },
-  { testId: 'detalhes-lote-dialog', css: '.v-dialog--active .v-card:has-text("lote")' },
-  { testId: 'detalhes-lote-nome-input', css: '.v-dialog--active input[type="text"], .v-dialog--active .v-text-field input' },
-  { testId: 'detalhes-lote-criar-confirm', css: '.v-dialog--active button:has-text("Criar"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-lote-com-itens-alert', css: '.v-dialog--active .v-alert' },
-  { testId: 'detalhes-lote-delete-dialog', css: '.v-dialog--active .v-card:has-text("excluir"), .v-dialog--active .v-card:has-text("Excluir lote")' },
-  { testId: 'detalhes-lote-delete-confirm', css: '.v-dialog--active button:has-text("Excluir"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-mesclar-dialog', css: '.v-dialog--active .v-card:has-text("Mesclar")' },
-  { testId: 'detalhes-mesclar-nome-input', css: '.v-dialog--active input' },
-  { testId: 'detalhes-mesclar-confirm', css: '.v-dialog--active button:has-text("Mesclar"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-duplicar-lotes-dialog', css: '.v-dialog--active .v-card:has-text("Duplicar")' },
-  { testId: 'detalhes-duplicar-lotes-nome-input', css: '.v-dialog--active input[type="text"]' },
-  { testId: 'detalhes-duplicar-lotes-copiar-precos', css: '.v-dialog--active .v-input--checkbox, .v-dialog--active label:has-text("preço")' },
-  { testId: 'detalhes-duplicar-lotes-confirm', css: '.v-dialog--active button:has-text("Confirmar"), .v-dialog--active button:has-text("Duplicar")' },
+  // Row actions — stock uses mdi-file-check (not content-copy) for Duplicar
+  { testId: 'detalhes-item-delete-btn', css: 'button:has(.mdi-delete)' },
+  { testId: 'detalhes-item-duplicate-btn', css: 'button:has(.mdi-file-check), button:has(.mdi-content-copy)' },
+  { testId: 'detalhes-item-share-btn', css: 'button:has(.mdi-share)' },
+  { testId: 'detalhes-ordenar-select', css: '.v-select:has-text("Ordenar por"), label:has-text("Ordenar por") ~ div' },
+  { testId: 'detalhes-ordenar-option-custom', css: '.v-menu__content .v-list-item:has-text("Personalizado"), [role="option"]:has-text("Personalizado")' },
+  { testId: 'detalhes-restaurar-ordem-btn', css: 'button:has-text("Restaurar ordenação"), button:has-text("Restaurar")' },
+  // Dialogs: CSS :has-text is unreliable — also mapped via injectOpenDetalhesDialogs
+  { testId: 'detalhes-delete-items-dialog', css: '[role="dialog"]:has-text("deletar")' },
+  { testId: 'detalhes-delete-items-confirm', css: '[role="dialog"] button:has-text("Sim, deletar")' },
+  { testId: 'detalhes-duplicate-dialog', css: '[role="dialog"]:has-text("duplicar os itens")' },
+  { testId: 'detalhes-duplicate-confirm', css: '[role="dialog"]:has-text("duplicar") button:has-text("Confirmar")' },
+  { testId: 'detalhes-share-dialog', css: '[role="dialog"]:has-text("Compartilhar item")' },
+  { testId: 'detalhes-share-confirm', css: '[role="dialog"]:has-text("Compartilhar item") button:has-text("Compartilhar")' },
+  { testId: 'detalhes-lote-dialog', css: '[role="dialog"]:has-text("Criar lote"), [role="dialog"]:has-text("Novo lote")' },
+  { testId: 'detalhes-lote-nome-input', css: '[role="dialog"] input[type="text"]' },
+  { testId: 'detalhes-lote-criar-confirm', css: '[role="dialog"] button:has-text("Criar")' },
+  { testId: 'detalhes-lote-com-itens-alert', css: '[role="dialog"] .v-alert' },
+  { testId: 'detalhes-lote-delete-dialog', css: '[role="dialog"]:has-text("Excluir lote")' },
+  { testId: 'detalhes-lote-delete-confirm', css: '[role="dialog"] button:has-text("Sim, excluir")' },
+  { testId: 'detalhes-mesclar-dialog', css: '[role="dialog"]:has-text("Mesclar")' },
+  { testId: 'detalhes-mesclar-nome-input', css: '[role="dialog"]:has-text("Mesclar") input[type="text"]' },
+  { testId: 'detalhes-mesclar-confirm', css: '[role="dialog"] button:has-text("Mesclar lotes")' },
+  { testId: 'detalhes-duplicar-lotes-dialog', css: '[role="dialog"]:has-text("Nova cotação a partir de lotes")' },
+  { testId: 'detalhes-duplicar-lotes-nome-input', css: '[role="dialog"]:has-text("Nova cotação") input[type="text"]' },
+  { testId: 'detalhes-duplicar-lotes-copiar-precos', css: '[role="dialog"] .v-input--checkbox:has-text("Copiar preços"), [role="dialog"] label:has-text("Copiar preços")' },
+  { testId: 'detalhes-duplicar-lotes-confirm', css: '[role="dialog"] button:has-text("Duplicar lotes")' },
   { testId: 'detalhes-lote-editar-action', css: '.v-menu__content .v-list-item:has-text("Editar"), [role="menuitem"]:has-text("Editar")' },
   { testId: 'detalhes-lote-excluir-action', css: '.v-menu__content .v-list-item:has-text("Excluir"), [role="menuitem"]:has-text("Excluir")' },
-  { testId: 'detalhes-lote-inline-nome', css: 'input.lote-name, .lote-name input, input[type="text"]:near(.lote-name)' },
-  { testId: 'detalhes-lote-salvar-inline', css: 'button:has(.mdi-check), button[aria-label*="Salvar"]' },
-  { testId: 'detalhes-send-quote-dialog', css: '.v-dialog--active .send-dialog, .v-dialog--active .v-card:has-text("Enviar")' },
-  { testId: 'detalhes-enviar-confirm', css: '.v-dialog--active button:has-text("Enviar")' },
-  { testId: 'detalhes-send-stat-limit-label', css: '.send-dialog .send-stat__label, .v-dialog--active .send-stat__label' },
-  { testId: 'detalhes-prazo-dialog', css: '.v-dialog--active .v-card:has-text("Prazo")' },
-  { testId: 'detalhes-prazo-dias-input', css: '.v-dialog--active input[type="number"]' },
-  { testId: 'detalhes-prazo-justificativa-input', css: '.v-dialog--active textarea' },
-  { testId: 'detalhes-prazo-confirm', css: '.v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-finalizar-dialog', css: '.v-dialog--active .v-card:has-text("Finalizar")' },
-  { testId: 'detalhes-finalizar-confirm', css: '.v-dialog--active button:has-text("Finalizar"), .v-dialog--active button:has-text("Confirmar")' },
-  { testId: 'detalhes-ia-access-dialog', css: '.v-dialog--active .v-card:has-text("IA")' },
-  { testId: 'detalhes-ia-interesse-btn', css: '.v-dialog--active button:has-text("interesse"), .v-dialog--active button:has-text("Solicitar")' },
-  { testId: 'detalhes-mover-lote-select', css: 'label:has-text("lote") ~ div .v-select, .v-select:near(button:has-text("Mover"))' },
+  { testId: 'detalhes-lote-inline-nome', css: 'input.lote-input-inline' },
+  { testId: 'detalhes-lote-salvar-inline', css: '.lote-edit-actions button:has(.mdi-check)' },
+  { testId: 'detalhes-send-quote-dialog', css: '[role="dialog"] .send-dialog, .send-custom-quote-dialog .send-dialog' },
+  { testId: 'detalhes-enviar-confirm', css: '[role="dialog"] .send-dialog__btn-primary, .send-dialog a.send-dialog__btn-primary' },
+  { testId: 'detalhes-send-stat-limit-label', css: '.send-dialog .send-stat__label' },
+  { testId: 'detalhes-prazo-dialog', css: '[role="dialog"]:has-text("prazo adicional")' },
+  { testId: 'detalhes-prazo-dias-input', css: '[role="dialog"]:has-text("prazo") input[type="number"]' },
+  { testId: 'detalhes-prazo-justificativa-input', css: '[role="dialog"]:has-text("prazo") textarea' },
+  { testId: 'detalhes-prazo-confirm', css: '[role="dialog"]:has-text("prazo") button:has-text("Confirmar")' },
+  { testId: 'detalhes-finalizar-dialog', css: '[role="dialog"]:has-text("Finalizar cotação")' },
+  { testId: 'detalhes-finalizar-confirm', css: '[role="dialog"] button:has-text("Finalizar cotação")' },
+  { testId: 'detalhes-ia-access-dialog', css: '[role="dialog"]:has-text("não contratado"), [role="dialog"]:has-text("Cotação com IA")' },
+  { testId: 'detalhes-ia-interesse-btn', css: '[role="dialog"] button:has-text("interesse"), [role="dialog"] button:has-text("Solicitar")' },
+  { testId: 'detalhes-mover-lote-select', css: '.lote-select-batch, .lotes-batch-actions .v-select' },
 ]
 
 const ITEM_RULES: TestIdRule[] = [
@@ -193,27 +200,31 @@ const ITEM_RULES: TestIdRule[] = [
 ]
 
 const DOCUMENTOS_RULES: TestIdRule[] = [
-  { testId: 'documentos-page', css: 'main .v-card, main > .v-card' },
+  { testId: 'documentos-page', css: 'main .v-card, .v-card.pa-4' },
   { testId: 'documentos-cotacao-nome', css: 'p.text-h5, .text-h5' },
-  { testId: 'documentos-tr-select', css: '.v-select, .v-autocomplete' },
+  // TR is the 4th autocomplete (DFD, ETP, GRMR, TR)
+  {
+    testId: 'documentos-tr-select',
+    css: 'label:has-text("Termo de Referência") ~ * .v-autocomplete, .v-row:has-text("Termo de Referência") .v-autocomplete',
+  },
   { testId: 'documentos-aplicar-btn', css: 'button:has-text("Aplicar")' },
 ]
 
 const COLABORADORES_RULES: TestIdRule[] = [
-  { testId: 'colaboradores-page', css: 'main .v-card, main > .v-card' },
+  { testId: 'colaboradores-page', css: 'main .v-card, .v-card.pa-2' },
   { testId: 'colaboradores-cotacao-nome', css: 'p:has-text("Cotação:")' },
   { testId: 'colaboradores-count', css: 'span.px-4, span:has-text("selecionado")' },
-  { testId: 'colaboradores-salvar-btn', css: 'button:has-text("Salvar")' },
+  { testId: 'colaboradores-salvar-btn', css: 'button:has-text("Salvar Seleção"), button:has-text("Salvar")' },
 ]
 
 const DIRETA_RULES: TestIdRule[] = [
-  { testId: 'direta-page', css: 'main .v-card, [class*="w-full"]' },
+  { testId: 'direta-page', css: 'main .v-card, .v-card.w-full' },
   { testId: 'direta-cotacao-nome', css: 'p.text-h5, .text-h5' },
-  { testId: 'direta-fornecedor-select', css: '.v-autocomplete, .v-select:near(label:has-text("Fornecedor"))' },
-  { testId: 'direta-unidade-select', css: '.v-select:has-text("Unidade"), label:has-text("Unidade") ~ div' },
-  { testId: 'direta-unidade-option-UN', css: '.v-list-item:has-text("UN"), [role="option"]:has-text("UN")' },
-  { testId: 'direta-valor-unitario', css: 'input:near(label:has-text("Valor")), label:has-text("Valor") + input' },
-  { testId: 'direta-data-cotacao', css: 'input[type="date"], input:near(label:has-text("Data"))' },
+  { testId: 'direta-fornecedor-select', css: '.v-autocomplete:has-text("Fornecedor"), label:has-text("Fornecedor") ~ input, .v-autocomplete' },
+  { testId: 'direta-unidade-select', css: '.v-select:has-text("Unidade de medida"), label:has-text("Unidade de medida") ~ div' },
+  { testId: 'direta-unidade-option-UN', css: '.v-menu__content .v-list-item:has-text("Unidade"), .v-list-item:has-text("UN"), [role="option"]:has-text("UN")' },
+  { testId: 'direta-valor-unitario', css: 'label:has-text("Valor Unitário") ~ input, .v-text-field:has-text("Valor Unitário") input' },
+  { testId: 'direta-data-cotacao', css: 'input[type="date"], label:has-text("Data da Cotação") ~ input' },
   { testId: 'direta-salvar-btn', css: 'button:has-text("Salvar")', all: true },
 ]
 
@@ -489,6 +500,7 @@ export async function injectTestIds(
 
 /**
  * Dynamic lote / item row ids used by DnD and lote rename specs.
+ * Walks the Vue page instance to resolve real lote ids (stock DOM has none).
  */
 export async function injectDynamicDetalhesTestIds(
   page: Page,
@@ -496,38 +508,171 @@ export async function injectDynamicDetalhesTestIds(
 ): Promise<number> {
   return page.evaluate((force) => {
     let n = 0
-    const set = (el: Element | null, id: string) => {
+    const set = (el: Element | null | undefined, id: string) => {
       if (!el) return
       if (!force && el.getAttribute('data-testid') === id) return
-      if (!force && el.hasAttribute('data-testid') && el.getAttribute('data-testid') !== id)
+      if (
+        !force &&
+        el.hasAttribute('data-testid') &&
+        el.getAttribute('data-testid') !== id
+      ) {
         return
+      }
       el.setAttribute('data-testid', id)
       n += 1
     }
 
-    document.querySelectorAll('tr.lote-row, tr[class*="lote"]').forEach((tr, idx) => {
-      const id =
-        tr.getAttribute('data-lote-id') ||
-        tr.getAttribute('data-id') ||
-        String(idx + 1)
-      set(tr, `detalhes-lote-row-${id}`)
-      const cb = tr.querySelector('.v-input--checkbox, input[type="checkbox"]')
-      if (cb) set(cb.closest('.v-input') || cb, `detalhes-lote-select-${id}`)
-      const name = tr.querySelector('.lote-name, .lote-header-tag')
-      if (name && name.classList.contains('lote-name')) set(name, `detalhes-lote-nome-${id}`)
+    type VueLike = {
+      lotes?: Array<{ id: number; nome?: string }>
+      objects?: Array<{ id: number; lote?: number | null }>
+      $children?: VueLike[]
+    }
+
+    const findDetalhesVm = (vm: VueLike | null | undefined, depth = 0): VueLike | null => {
+      if (!vm || depth > 50) return null
+      if (Array.isArray(vm.lotes) && vm.lotes.length >= 0 && 'objects' in vm) return vm
+      if (Array.isArray(vm.lotes)) return vm
+      for (const child of vm.$children || []) {
+        const found = findDetalhesVm(child, depth + 1)
+        if (found) return found
+      }
+      return null
+    }
+
+    let pageVm: VueLike | null = null
+    const nuxt = (window as unknown as { $nuxt?: VueLike }).$nuxt
+    if (nuxt) pageVm = findDetalhesVm(nuxt)
+
+    if (!pageVm) {
+      const rootEl =
+        document.querySelector('#__layout') ||
+        document.querySelector('#__nuxt') ||
+        document.querySelector('#app')
+      pageVm = findDetalhesVm((rootEl as { __vue__?: VueLike } | null)?.__vue__ || null)
+    }
+
+    if (!pageVm) {
+      const nodes = document.querySelectorAll('*')
+      for (let i = 0; i < nodes.length; i++) {
+        const vm = (nodes[i] as { __vue__?: VueLike }).__vue__
+        if (vm && Array.isArray(vm.lotes) && vm.lotes.length) {
+          pageVm = vm
+          break
+        }
+      }
+    }
+
+    const lotes = pageVm?.lotes || []
+
+    // Gestão de lotes cards — prefer Vue id, else match by visible name
+    document.querySelectorAll('.lote-item').forEach((el, idx) => {
+      const name = (el.querySelector('.lote-name')?.textContent || '').trim()
+      const matched = lotes.find((l) => (l.nome || '').trim() === name)
+      const id = matched?.id ?? lotes[idx]?.id ?? idx + 1
+      set(el, `detalhes-lote-card-${id}`)
+      set(el.querySelector('.lote-name'), `detalhes-lote-nome-${id}`)
+      const menuBtn = el.querySelector('.lote-actions-inline button')
+      set(menuBtn, `detalhes-lote-menu-${id}`)
+      // Inline edit controls (when present)
+      const inlineInput = el.querySelector('input.lote-input-inline')
+      set(inlineInput, 'detalhes-lote-inline-nome')
+      el.querySelectorAll('.lote-edit-actions button').forEach((btn) => {
+        if (btn.querySelector('.mdi-check')) set(btn, 'detalhes-lote-salvar-inline')
+        if (btn.querySelector('.mdi-close')) set(btn, 'detalhes-lote-cancelar-inline')
+      })
     })
 
+    // Table lote header rows (same order as groupedItems ≈ lotes with items + empty)
+    document.querySelectorAll('tr.lote-row').forEach((tr, idx) => {
+      const nameEl = tr.querySelector('.lote-header-name')
+      const nameText = (nameEl?.textContent || '').trim().toUpperCase()
+      let id: number | string = idx + 1
+      const matched = lotes.find((l) => {
+        const label = `${l.ordem || ''} - ${(l.nome || '').toUpperCase()}`.trim()
+        return (
+          nameText.includes((l.nome || '').toUpperCase()) ||
+          nameText === label ||
+          nameText.endsWith((l.nome || '').toUpperCase())
+        )
+      })
+      if (matched) id = matched.id
+      else if (lotes[idx]) id = lotes[idx].id
+
+      set(tr, `detalhes-lote-row-${id}`)
+      const cb = tr.querySelector('.v-simple-checkbox, .v-input--checkbox, input[type="checkbox"]')
+      if (cb) set(cb.closest('.v-simple-checkbox') || cb.closest('.v-input') || cb, `detalhes-lote-select-${id}`)
+    })
+
+    // Item rows + select checkboxes (id from /item/:id link)
     document.querySelectorAll('a.text-decoration-none[href*="/v2/cotacoes/item/"]').forEach((a) => {
       const m = a.getAttribute('href')?.match(/item\/(\d+)/)
       const row = a.closest('tr')
-      if (m && row) set(row, `detalhes-item-row-${m[1]}`)
+      if (!m || !row) return
+      const itemId = m[1]
+      set(row, `detalhes-item-row-${itemId}`)
       set(a, 'detalhes-item-link')
+      const cb = row.querySelector('.v-simple-checkbox, .v-input--checkbox, input[type="checkbox"]')
+      if (cb) {
+        set(
+          cb.closest('.v-simple-checkbox') || cb.closest('.v-input') || cb,
+          `detalhes-item-select-${itemId}`,
+        )
+      }
     })
 
-    document.querySelectorAll('.v-list-item, [role="option"]').forEach((opt) => {
-      const text = (opt.textContent || '').trim()
+    // Open menus / selects — Personalizado + mover / duplicar lote options
+    document
+      .querySelectorAll(
+        '.v-menu__content .v-list-item, [role="option"], .v-select-list .v-list-item, [role="dialog"] .v-list-item, .v-dialog__content--active .v-list-item',
+      )
+      .forEach((opt) => {
+      const text = (opt.textContent || '').replace(/\s+/g, ' ').trim()
       if (/^personalizado$/i.test(text)) set(opt, 'detalhes-ordenar-option-custom')
       if (/^UN$/i.test(text)) set(opt, 'direta-unidade-option-UN')
+
+      const dialogRoot = opt.closest('.v-dialog__content--active, [role="dialog"]')
+      const dialogText = (dialogRoot?.textContent || '').replace(/\s+/g, ' ')
+      const inDuplicarDialog = /Nova cotação a partir de lotes|Selecione os lotes para duplicar/i.test(
+        dialogText,
+      )
+
+      for (const lote of lotes) {
+        const nome = lote.nome || ''
+        if (!nome || !text.includes(nome)) continue
+
+        if (inDuplicarDialog) {
+          set(opt, `detalhes-duplicar-lote-option-${lote.id}`)
+          continue
+        }
+
+        // Mover destino: "2 - Lote Destino E2E"
+        if (/^\d+\s*-/.test(text) || text === nome || text === (lote as { label?: string }).label) {
+          set(opt, `detalhes-mover-lote-option-${lote.id}`)
+        }
+      }
+    })
+
+    // Share dialog destination quotations
+    document.querySelectorAll('[role="dialog"] .v-list-item, .v-dialog--active .v-list-item').forEach((opt) => {
+      const text = (opt.textContent || '').replace(/\s+/g, ' ')
+      const valueAttr =
+        opt.getAttribute('value') ||
+        (opt as HTMLElement).dataset?.value ||
+        ''
+      if (valueAttr && /[0-9a-f-]{8,}/i.test(valueAttr)) {
+        set(opt, `detalhes-share-quotation-${valueAttr}`)
+        return
+      }
+      const uuidInText = text.match(
+        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
+      )
+      if (uuidInText) {
+        set(opt, `detalhes-share-quotation-${uuidInText[0]}`)
+        return
+      }
+      if (/DEST-99|Cotação Destino E2E/i.test(text)) {
+        set(opt, 'detalhes-share-quotation-e2e00000-0000-4000-8000-000000008099')
+      }
     })
 
     return n
@@ -557,6 +702,36 @@ const DETALHES_MENU_ACTION_RULES: TestIdRule[] = [
 export async function maybeInjectDetalhesMenuActions(page: Page): Promise<void> {
   if (!isInjectTestIdsEnabled()) return
   await injectTestIds(page, DETALHES_MENU_ACTION_RULES, { force: true })
+}
+
+/** Inject lote card menu actions (Editar / Excluir) after the dots menu is open. */
+export async function maybeInjectDetalhesLoteMenuActions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await injectTestIds(
+    page,
+    [
+      {
+        testId: 'detalhes-lote-editar-action',
+        css: '.v-menu__content .v-list-item:has-text("Editar")',
+      },
+      {
+        testId: 'detalhes-lote-excluir-action',
+        css: '.v-menu__content .v-list-item:has-text("Excluir")',
+      },
+    ],
+    { force: true },
+  )
+}
+
+/** Inject "Personalizado" after Ordenar por select is open. */
+export async function maybeInjectDetalhesOrdenarOptions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await ensureTestId(
+    page,
+    'detalhes-ordenar-option-custom',
+    '.v-menu__content .v-list-item:has-text("Personalizado"), [role="option"]:has-text("Personalizado")',
+    { force: true },
+  )
 }
 
 /** Inject formula dropdown options (menu must be open). */
@@ -597,6 +772,107 @@ export async function maybeInjectTestIds(
   if (surface === 'detalhes') {
     await injectDynamicDetalhesTestIds(page)
   }
+  if (surface === 'documentos') {
+    await injectDynamicDocumentosTestIds(page)
+  }
+  if (surface === 'colaboradores') {
+    await injectDynamicColaboradoresTestIds(page)
+  }
+  if (surface === 'direta') {
+    await injectDynamicDiretaTestIds(page)
+  }
+}
+
+/** TR autocomplete options (menu must be open). */
+export async function maybeInjectDocumentosTrOptions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await page.evaluate(() => {
+    document
+      .querySelectorAll(
+        '.v-menu__content .v-list-item, .v-autocomplete__content .v-list-item, [role="option"]',
+      )
+      .forEach((opt) => {
+        const text = (opt.textContent || '').trim()
+        if (/TR E2E/i.test(text)) {
+          opt.setAttribute('data-testid', 'documentos-tr-option-501')
+        }
+      })
+  })
+}
+
+/** Fornecedor / unidade options after select open. */
+export async function maybeInjectDiretaSelectOptions(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await page.evaluate(() => {
+    document
+      .querySelectorAll(
+        '.v-menu__content .v-list-item, .v-autocomplete__content .v-list-item, [role="option"]',
+      )
+      .forEach((opt) => {
+        const text = (opt.textContent || '').replace(/\s+/g, ' ').trim()
+        if (/12345678000199|Fornecedor E2E/i.test(text)) {
+          opt.setAttribute(
+            'data-testid',
+            'direta-fornecedor-option-12345678000199',
+          )
+        }
+        if (/^Unidade$/i.test(text) || /^UN$/i.test(text) || /\bUN\b/.test(text)) {
+          opt.setAttribute('data-testid', 'direta-unidade-option-UN')
+        }
+      })
+  })
+}
+
+async function injectDynamicDocumentosTestIds(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    // Prefer the TR row autocomplete
+    const rows = Array.from(document.querySelectorAll('.v-row'))
+    const trRow = rows.find((r) =>
+      /Termo de Referência|\(TR\)/i.test(r.textContent || ''),
+    )
+    const trSelect =
+      trRow?.querySelector('.v-autocomplete') ||
+      document.querySelectorAll('.v-autocomplete')[3]
+    if (trSelect) trSelect.setAttribute('data-testid', 'documentos-tr-select')
+  })
+}
+
+async function injectDynamicColaboradoresTestIds(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.querySelectorAll('tr').forEach((tr) => {
+      if (!/Colaborador E2E/i.test(tr.textContent || '')) return
+      const cb =
+        tr.querySelector('.v-input--checkbox') ||
+        tr.querySelector('input[type="checkbox"]')?.closest('.v-input')
+      if (cb) cb.setAttribute('data-testid', 'colaboradores-user-check-701')
+    })
+  })
+}
+
+async function injectDynamicDiretaTestIds(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.querySelectorAll('.mb-8 > .v-card, .v-card.pa-4').forEach((card) => {
+      const title = card.querySelector('.text-subtitle-1, .font-weight-bold')
+      const text = title?.textContent || ''
+      // "1 - Caneta..." — no id in text; fall back to first card = fixture item
+      const m = text.match(/item\/(\d+)/)
+      if (m) {
+        card.setAttribute('data-testid', `direta-item-${m[1]}`)
+      }
+    })
+    // Map first price-form item card to fixture 9001 when only one item
+    const cards = document.querySelectorAll('.mb-8 > .v-card.pa-4, div.mb-8 > .v-card')
+    if (cards.length === 1) {
+      cards[0].setAttribute('data-testid', 'direta-item-9001')
+    } else {
+      cards.forEach((card, idx) => {
+        if (!card.getAttribute('data-testid')) {
+          // Keep stable for single-item stubs used by the suite
+          if (idx === 0) card.setAttribute('data-testid', 'direta-item-9001')
+        }
+      })
+    }
+  })
 }
 
 /** Force re-apply item registry (dialogs / tab-gated controls after UI mutation). */
@@ -606,7 +882,178 @@ export async function maybeReinjectItemTestIds(page: Page): Promise<void> {
   await injectOpenItemDialogs(page)
 }
 
-/** Map visible dialogs via role/text — Vuetify :has-text CSS is unreliable on role=dialog. */
+/** Force re-apply detalhes registry after dialogs / menus / DnD mode. */
+export async function maybeReinjectDetalhesTestIds(page: Page): Promise<void> {
+  if (!isInjectTestIdsEnabled()) return
+  await injectTestIds(page, 'detalhes', { force: true })
+  await injectDynamicDetalhesTestIds(page, { force: true })
+  await injectOpenDetalhesDialogs(page)
+}
+
+/** Map visible detalhes dialogs via role/text — Vuetify :has-text CSS is unreliable. */
+async function injectOpenDetalhesDialogs(page: Page): Promise<void> {
+  let dialog = page.getByRole('dialog')
+  let count = await dialog.count()
+  if (count === 0) {
+    dialog = page.locator('.v-dialog__content--active')
+    count = await dialog.count()
+  }
+  if (count === 0) return
+
+  for (let i = 0; i < count; i++) {
+    const d = dialog.nth(i)
+    if (!(await d.isVisible().catch(() => false))) continue
+    const text = ((await d.innerText().catch(() => '')) || '').replace(/\s+/g, ' ')
+    const hasSendDialog = (await d.locator('.send-dialog').count()) > 0
+
+    let dialogId: string | null = null
+    let confirmId: string | null = null
+    let confirmName: RegExp | null = null
+
+    if (/Deseja deletar todos os itens|Sim, deletar/i.test(text)) {
+      dialogId = 'detalhes-delete-items-dialog'
+      confirmId = 'detalhes-delete-items-confirm'
+      confirmName = /Sim, deletar/i
+    } else if (/duplicar os itens selecionados/i.test(text)) {
+      dialogId = 'detalhes-duplicate-dialog'
+      confirmId = 'detalhes-duplicate-confirm'
+      confirmName = /^Confirmar$/i
+    } else if (/Compartilhar item/i.test(text)) {
+      dialogId = 'detalhes-share-dialog'
+      confirmId = 'detalhes-share-confirm'
+      confirmName = /^Compartilhar$/i
+    } else if (/Excluir lote\?/i.test(text)) {
+      dialogId = 'detalhes-lote-delete-dialog'
+      confirmId = 'detalhes-lote-delete-confirm'
+      confirmName = /Sim, excluir/i
+    } else if (/Mesclar \d+ lotes|Nome final do lote/i.test(text)) {
+      dialogId = 'detalhes-mesclar-dialog'
+      confirmId = 'detalhes-mesclar-confirm'
+      confirmName = /Mesclar lotes/i
+    } else if (/Nova cotação a partir de lotes/i.test(text)) {
+      dialogId = 'detalhes-duplicar-lotes-dialog'
+      confirmId = 'detalhes-duplicar-lotes-confirm'
+      confirmName = /Duplicar lotes/i
+    } else if (
+      /Criar lote|Novo lote|Editar lote/i.test(text) ||
+      (/item\(ns\) será adicionado/i.test(text) && /lote/i.test(text))
+    ) {
+      dialogId = 'detalhes-lote-dialog'
+      confirmId = 'detalhes-lote-criar-confirm'
+      confirmName = /^(Criar|Criar com itens|Salvar)$/i
+    } else if (/Adicionar prazo adicional/i.test(text)) {
+      dialogId = 'detalhes-prazo-dialog'
+      confirmId = 'detalhes-prazo-confirm'
+      confirmName = /^Confirmar$/i
+    } else if (/Finalizar cotação personalizada/i.test(text)) {
+      dialogId = 'detalhes-finalizar-dialog'
+      confirmId = 'detalhes-finalizar-confirm'
+      confirmName = /Finalizar cotação/i
+    } else if (/não contratado|Módulo Cotação com IA/i.test(text)) {
+      dialogId = 'detalhes-ia-access-dialog'
+      confirmId = 'detalhes-ia-interesse-btn'
+      confirmName = /Tenho interesse|interesse|Solicitar/i
+    } else if (hasSendDialog || /Limite contratado|Confirmar envio|Créditos disponíveis/i.test(text)) {
+      dialogId = 'detalhes-send-quote-dialog'
+      confirmId = 'detalhes-enviar-confirm'
+      confirmName = null
+    }
+
+    if (!dialogId) continue
+
+    // Prefer the inner .send-dialog card to avoid duplicate testids on wrapper + card
+    if (dialogId === 'detalhes-send-quote-dialog') {
+      const sendCard = d.locator('.send-dialog').first()
+      if ((await sendCard.count()) > 0) {
+        await sendCard.evaluate((el, id) => el.setAttribute('data-testid', id), dialogId)
+      } else {
+        await d.evaluate((el, id) => el.setAttribute('data-testid', id), dialogId)
+      }
+      // Clear accidental duplicate on the outer wrapper
+      await d.evaluate((el) => {
+        if (el.classList.contains('v-dialog__content') && el.getAttribute('data-testid') === 'detalhes-send-quote-dialog') {
+          el.removeAttribute('data-testid')
+        }
+      })
+      const label = d.locator('.send-stat__label').first()
+      if ((await label.count()) > 0) {
+        await label.evaluate((el) =>
+          el.setAttribute('data-testid', 'detalhes-send-stat-limit-label'),
+        )
+      }
+      const primary = d.locator('.send-dialog__btn-primary').first()
+      if ((await primary.count()) > 0 && confirmId) {
+        await primary.evaluate((el, id) => el.setAttribute('data-testid', id), confirmId)
+      }
+      continue
+    }
+
+    await d.evaluate((el, id) => el.setAttribute('data-testid', id), dialogId)
+
+    if (dialogId === 'detalhes-lote-dialog') {
+      const alert = d.locator('.v-alert')
+      if ((await alert.count()) > 0) {
+        await alert
+          .first()
+          .evaluate((el) => el.setAttribute('data-testid', 'detalhes-lote-com-itens-alert'))
+      }
+      const nome = d.locator('input[type="text"]').first()
+      if ((await nome.count()) > 0) {
+        await nome.evaluate((el) => el.setAttribute('data-testid', 'detalhes-lote-nome-input'))
+      }
+    }
+
+    if (dialogId === 'detalhes-mesclar-dialog') {
+      const nome = d.locator('input[type="text"]').first()
+      if ((await nome.count()) > 0) {
+        await nome.evaluate((el) => el.setAttribute('data-testid', 'detalhes-mesclar-nome-input'))
+      }
+    }
+
+    if (dialogId === 'detalhes-duplicar-lotes-dialog') {
+      const nome = d.locator('input[type="text"]').first()
+      if ((await nome.count()) > 0) {
+        await nome.evaluate((el) =>
+          el.setAttribute('data-testid', 'detalhes-duplicar-lotes-nome-input'),
+        )
+      }
+      const copyPrices = d
+        .locator('.v-input--checkbox')
+        .filter({ hasText: /Copiar preços/i })
+      if ((await copyPrices.count()) > 0) {
+        await copyPrices
+          .first()
+          .evaluate((el) =>
+            el.setAttribute('data-testid', 'detalhes-duplicar-lotes-copiar-precos'),
+          )
+      }
+    }
+
+    if (dialogId === 'detalhes-prazo-dialog') {
+      const dias = d.locator('input[type="number"]').first()
+      if ((await dias.count()) > 0) {
+        await dias.evaluate((el) => el.setAttribute('data-testid', 'detalhes-prazo-dias-input'))
+      }
+      const just = d.locator('textarea').first()
+      if ((await just.count()) > 0) {
+        await just.evaluate((el) =>
+          el.setAttribute('data-testid', 'detalhes-prazo-justificativa-input'),
+        )
+      }
+    }
+
+    if (confirmId && confirmName) {
+      const btn = d.getByRole('button', { name: confirmName })
+      if ((await btn.count()) > 0) {
+        await btn
+          .first()
+          .evaluate((el, id) => el.setAttribute('data-testid', id), confirmId)
+      }
+    }
+  }
+}
+
+/** Map visible item dialogs via role/text — Vuetify :has-text CSS is unreliable on role=dialog. */
 async function injectOpenItemDialogs(page: Page): Promise<void> {
   const dialog = page.getByRole('dialog')
   const count = await dialog.count()

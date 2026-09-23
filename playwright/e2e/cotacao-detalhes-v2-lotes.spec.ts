@@ -5,7 +5,10 @@ import {
 } from '../support/fixtures/factories'
 import {
   gotoDetalhesPage,
+  openLoteMenu,
+  reinjectDetalhesTestIds,
   stubDetalhesPageApis,
+  waitForDetalhesDialog,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
 
@@ -62,9 +65,10 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
 
     await log.step('Open Novo lote and submit')
     await page.getByTestId('detalhes-novo-lote-btn').click()
-    await expect(page.getByTestId('detalhes-lote-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-lote-dialog')
     await page.getByTestId('detalhes-lote-nome-input').fill('Lote E2E P2')
     await page.getByTestId('detalhes-lote-criar-confirm').click()
+    await reinjectDetalhesTestIds(page)
 
     await expect(page.getByTestId('detalhes-lote-nome-2')).toHaveText('Lote E2E P2')
     expect(lotesState.some((l) => l.nome === 'Lote E2E P2')).toBe(true)
@@ -110,9 +114,9 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Delete empty lote via menu')
-    await page.getByTestId(`detalhes-lote-menu-${emptyLoteId}`).click()
+    await openLoteMenu(page, emptyLoteId)
     await page.getByTestId('detalhes-lote-excluir-action').click()
-    await expect(page.getByTestId('detalhes-lote-delete-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-lote-delete-dialog')
 
     lotesState = lotesState.filter((l) => l.id !== emptyLoteId)
     await page.getByTestId('detalhes-lote-delete-confirm').click()
@@ -170,10 +174,11 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
     await log.step('Select both lotes and open merge dialog')
     await page.getByTestId(`detalhes-lote-select-${DETALHES_FIXTURE_IDS.LOTE_ID}`).click()
     await page.getByTestId(`detalhes-lote-select-${lote2Id}`).click()
+    await reinjectDetalhesTestIds(page)
     await expect(page.getByTestId('detalhes-mesclar-lotes-btn')).toBeVisible()
     await page.getByTestId('detalhes-mesclar-lotes-btn').click()
 
-    await expect(page.getByTestId('detalhes-mesclar-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-mesclar-dialog')
     await page.getByTestId('detalhes-mesclar-nome-input').fill('Lote consolidado E2E')
 
     lotesState = [
@@ -239,9 +244,11 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
     await page
       .getByTestId(`detalhes-item-select-${DETALHES_FIXTURE_IDS.ITEM_ID}`)
       .click()
+    await reinjectDetalhesTestIds(page)
     await expect(page.getByTestId('detalhes-mover-itens-btn')).toBeVisible()
 
     await page.getByTestId('detalhes-mover-lote-select').click()
+    await reinjectDetalhesTestIds(page)
     await page.getByTestId('detalhes-mover-lote-option-2').click()
     await page.getByTestId('detalhes-mover-itens-btn').click()
 
@@ -276,7 +283,8 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
 
     await log.step('Open duplicar-lotes dialog, select lote, confirm')
     await page.getByTestId('detalhes-duplicar-lotes-btn').click()
-    await expect(page.getByTestId('detalhes-duplicar-lotes-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-duplicar-lotes-dialog')
+    await reinjectDetalhesTestIds(page)
     await page
       .getByTestId(`detalhes-duplicar-lote-option-${DETALHES_FIXTURE_IDS.LOTE_ID}`)
       .click()
@@ -354,10 +362,11 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
     await log.step('Select items, open Com itens, create lote')
     await page.getByTestId(`detalhes-item-select-${itemA}`).click()
     await page.getByTestId(`detalhes-item-select-${itemB}`).click()
+    await reinjectDetalhesTestIds(page)
     await expect(page.getByTestId('detalhes-lote-com-itens-btn')).toBeEnabled()
     await page.getByTestId('detalhes-lote-com-itens-btn').click()
 
-    await expect(page.getByTestId('detalhes-lote-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-lote-dialog')
     await expect(page.getByTestId('detalhes-lote-com-itens-alert')).toContainText(
       '2 item(ns)',
     )
@@ -370,6 +379,7 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
       ordem: 2,
     })
     await page.getByTestId('detalhes-lote-criar-confirm').click()
+    await reinjectDetalhesTestIds(page)
 
     const { status, requestJson } = await createComItensCall
     expect(status).toBe(200)
@@ -419,10 +429,9 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Edit lote name inline and save')
-    await page
-      .getByTestId(`detalhes-lote-menu-${DETALHES_FIXTURE_IDS.LOTE_ID}`)
-      .click()
+    await openLoteMenu(page, DETALHES_FIXTURE_IDS.LOTE_ID)
     await page.getByTestId('detalhes-lote-editar-action').click()
+    await reinjectDetalhesTestIds(page)
     await page.getByTestId('detalhes-lote-inline-nome').fill('Lote Renomeado E2E')
 
     lotesState[0] = {
@@ -430,6 +439,7 @@ test.describe('Cotação Detalhes v2 — lotes', () => {
       nome: 'Lote Renomeado E2E',
     }
     await page.getByTestId('detalhes-lote-salvar-inline').click()
+    await reinjectDetalhesTestIds(page)
 
     const { status, requestJson } = await updateLoteCall
     expect(status).toBe(200)

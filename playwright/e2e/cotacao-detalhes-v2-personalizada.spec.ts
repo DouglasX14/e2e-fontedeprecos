@@ -3,6 +3,7 @@ import {
   gotoDetalhesPage,
   openAcoesMenu,
   stubDetalhesPageApis,
+  waitForDetalhesDialog,
   waitForDetalhesPageReady,
 } from '../support/helpers/stub-detalhes-page'
 
@@ -32,7 +33,7 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
     await log.step('Open IA access dialog and send interest')
     await expect(page.getByTestId('detalhes-cotacao-ia-btn')).toBeVisible()
     await page.getByTestId('detalhes-cotacao-ia-btn').click()
-    await expect(page.getByTestId('detalhes-ia-access-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-ia-access-dialog')
     await page.getByTestId('detalhes-ia-interesse-btn').click()
 
     const { status } = await interesseCall
@@ -94,8 +95,8 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
     await waitForDetalhesPageReady(page)
 
     await log.step('Assert capacity dialog from query')
+    await waitForDetalhesDialog(page, 'detalhes-send-quote-dialog')
     const dialog = page.getByTestId('detalhes-send-quote-dialog')
-    await expect(dialog).toBeVisible()
     await expect(dialog.getByText('Limite contratado atingido')).toBeVisible()
     await expect(
       dialog.getByTestId('detalhes-send-stat-limit-label'),
@@ -124,7 +125,7 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
     await openAcoesMenu(page)
     await page.getByTestId('detalhes-acao-novo-item').click()
 
-    await expect(page.getByTestId('detalhes-send-quote-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-send-quote-dialog')
     await expect(page.getByText('Limite contratado atingido')).toBeVisible()
     await expect(page).toHaveURL(
       new RegExp(`/v2/cotacao/cotacoes/detalhes/${stubs.cotacaoId}`),
@@ -156,7 +157,7 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
 
     await log.step('Open prazo dialog and confirm')
     await page.getByTestId('detalhes-prazo-adicional-btn').click()
-    await expect(page.getByTestId('detalhes-prazo-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-prazo-dialog')
     await page.getByTestId('detalhes-prazo-dias-input').fill('3')
     await page
       .getByTestId('detalhes-prazo-justificativa-input')
@@ -204,8 +205,8 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
 
     await log.step('Open send dialog and confirm')
     await page.getByTestId('detalhes-enviar-cotacao-btn').click()
+    await waitForDetalhesDialog(page, 'detalhes-send-quote-dialog')
     const dialog = page.getByTestId('detalhes-send-quote-dialog')
-    await expect(dialog).toBeVisible()
     await expect(dialog.getByText('Confirmar envio')).toBeVisible()
     await page.getByTestId('detalhes-enviar-confirm').click()
 
@@ -249,7 +250,7 @@ test.describe('Cotação Detalhes v2 — personalizada / IA / capacity', () => {
 
     await log.step('Open finalize dialog, choose Concluído, confirm')
     await page.getByTestId('detalhes-finalizar-cotacao-btn').click()
-    await expect(page.getByTestId('detalhes-finalizar-dialog')).toBeVisible()
+    await waitForDetalhesDialog(page, 'detalhes-finalizar-dialog')
     await page
       .getByTestId('detalhes-finalizar-dialog')
       .getByText('Concluído', { exact: true })

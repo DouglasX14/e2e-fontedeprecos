@@ -5,6 +5,9 @@ import {
   gotoColaboradoresPage,
   gotoDiretaPage,
   gotoDocumentosPage,
+  openDiretaFornecedorSelect,
+  openDiretaUnidadeSelect,
+  openDocumentosTrSelect,
   stubColaboradoresPageApis,
   stubDiretaPageApis,
   stubDocumentosPageApis,
@@ -38,7 +41,7 @@ test.describe('Documentos da cotação — /v2/cotacoes/:id/documentos', () => {
       fulfillResponse: { status: 200, body: { ok: true } },
     })
 
-    await page.getByTestId('documentos-tr-select').click()
+    await openDocumentosTrSelect(page)
     await page
       .getByTestId(`documentos-tr-option-${SATELLITE_FIXTURE_IDS.TR_ID}`)
       .click()
@@ -136,14 +139,14 @@ test.describe('Cotação direta — /v2/cotacao/cotacoes/detalhes/:id/direta', (
       page.getByTestId(`direta-item-${DETALHES_FIXTURE_IDS.ITEM_ID}`),
     ).toBeVisible()
 
-    await page.getByTestId('direta-fornecedor-select').click()
+    await openDiretaFornecedorSelect(page)
     await page
       .getByTestId(
         `direta-fornecedor-option-${SATELLITE_FIXTURE_IDS.SUPPLIER_CNPJ}`,
       )
       .click()
 
-    await page.getByTestId('direta-unidade-select').click()
+    await openDiretaUnidadeSelect(page)
     await page.getByTestId('direta-unidade-option-UN').click()
 
     await page.getByTestId('direta-valor-unitario').fill('10,50')
