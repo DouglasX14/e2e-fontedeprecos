@@ -23,8 +23,11 @@ export type TestIdSurface =
   | 'colaboradores'
   | 'direta'
   | 'adicionar-item'
+  | 'editar-item'
   | 'expressa'
   | 'lista'
+  | 'importar-itens'
+  | 'ia'
 
 const DETALHES_RULES: TestIdRule[] = [
   { testId: 'detalhes-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light' },
@@ -280,6 +283,75 @@ const LISTA_RULES: TestIdRule[] = [
   },
 ]
 
+// Same CotacaoItemForm as adicionar — Salvar instead of Adicionar
+const EDITAR_ITEM_RULES: TestIdRule[] = [
+  { testId: 'editar-item-page', css: 'main .v-card.w-full, main .v-card' },
+  { testId: 'editar-item-cotacao-nome', css: 'main p.text-h5.light, main .text-h5.light, main p.text-h5' },
+  { testId: 'editar-item-nome', css: 'label:has-text("Nome") ~ input, .v-text-field:has-text("Nome") input' },
+  {
+    testId: 'editar-item-quantidade',
+    css: 'label:has-text("Quantidade") ~ input, .v-text-field:has-text("Quantidade") input',
+  },
+  { testId: 'editar-item-submit', css: 'button:has-text("Salvar")' },
+  { testId: 'editar-item-voltar', css: 'a:has-text("Voltar"), button:has-text("Voltar")' },
+]
+
+const IMPORTAR_ITENS_RULES: TestIdRule[] = [
+  { testId: 'importar-itens-page', css: 'main .v-card, main' },
+  {
+    testId: 'importar-itens-cotacao-nome',
+    css: 'main p.text-h5, main .text-h5',
+  },
+  {
+    testId: 'importar-itens-modelo',
+    css: 'a:has-text("Baixar planilha modelo"), a[href*="Example.xlsx"]',
+  },
+  {
+    testId: 'importar-itens-escolher',
+    css: 'button:has-text("Escolher Arquivo")',
+  },
+  {
+    testId: 'importar-itens-file',
+    css: 'input[type="file"][accept*="xls"]',
+  },
+  {
+    testId: 'importar-itens-submit',
+    css: 'button:has-text("Importar itens")',
+  },
+  {
+    testId: 'importar-itens-cancelar',
+    css: 'button:has-text("Cancelar")',
+  },
+]
+
+const IA_RULES: TestIdRule[] = [
+  { testId: 'ia-page', css: 'main .cotar-ia-page, main .v-card, main' },
+  {
+    testId: 'ia-titulo',
+    css: 'main p.text-h5:has-text("Cotação com IA"), main .text-h6:has-text("Módulo Cotação com IA")',
+  },
+  {
+    testId: 'ia-sem-acesso',
+    css: 'main .v-card:has-text("não contratado"), main .text-h6:has-text("não contratado")',
+  },
+  {
+    testId: 'ia-tenho-interesse',
+    css: 'a:has-text("Tenho interesse"), button:has-text("Tenho interesse")',
+  },
+  {
+    testId: 'ia-voltar',
+    css: 'a:has-text("Voltar aos detalhes"), button:has-text("Voltar aos detalhes")',
+  },
+  {
+    testId: 'ia-cotacao-nome',
+    css: '.cotar-ia-header .text-body-2, .cotar-ia-header p.grey--text',
+  },
+  {
+    testId: 'ia-itens-panel',
+    css: '.cotar-ia-panel:has-text("Itens da cotação"), .cotar-ia-select',
+  },
+]
+
 export const TESTID_SURFACES: Record<TestIdSurface, TestIdRule[]> = {
   detalhes: DETALHES_RULES,
   item: ITEM_RULES,
@@ -287,8 +359,11 @@ export const TESTID_SURFACES: Record<TestIdSurface, TestIdRule[]> = {
   colaboradores: COLABORADORES_RULES,
   direta: DIRETA_RULES,
   'adicionar-item': ADICIONAR_ITEM_RULES,
+  'editar-item': EDITAR_ITEM_RULES,
   expressa: EXPRESSA_RULES,
   lista: LISTA_RULES,
+  'importar-itens': IMPORTAR_ITENS_RULES,
+  ia: IA_RULES,
 }
 
 export function isInjectTestIdsEnabled(): boolean {

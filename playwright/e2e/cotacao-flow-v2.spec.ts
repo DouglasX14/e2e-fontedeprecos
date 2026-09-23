@@ -1,10 +1,16 @@
 import { test, expect, log } from '../support/merged-fixtures'
 import {
   gotoAdicionarItemPage,
+  gotoEditarItemPage,
   gotoExpressaPage,
+  gotoIaPage,
+  gotoImportarItensPage,
   gotoListaCotacoesPage,
   stubAdicionarItemPageApis,
+  stubEditarItemPageApis,
   stubExpressaPageApis,
+  stubIaPageApis,
+  stubImportarItensPageApis,
   stubListaCotacoesPageApis,
 } from '../support/helpers/stub-flow-pages'
 import { maybeInjectTestIds } from '../support/helpers/inject-testids'
@@ -140,5 +146,153 @@ test.describe('Lista de cotações — /v2/cotacao/cotacoes', () => {
     await expect(page).toHaveURL(
       new RegExp(`/v2/cotacao/cotacoes/detalhes/${stubs.cotacaoId}`),
     )
+  })
+})
+
+test.describe('Editar item — /v2/cotacao/cotacoes/detalhes/editar-item/:id/:item_id', () => {
+  test('[P0] carrega item e salva edição', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub editar-item APIs')
+    const stubs = await stubEditarItemPageApis(interceptNetworkCall)
+
+    const editCall = interceptNetworkCall({
+      method: 'POST',
+      url: `**/api/v3/cotacao-item/${stubs.cotacaoId}/edit-item/${stubs.itemId}/**`,
+      fulfillResponse: {
+        status: 200,
+        body: { detail: 'Item atualizado com sucesso.' },
+      },
+    })
+
+    interceptNetworkCall({
+      url: `**/api/v3/cotacao/${stubs.cotacaoId}/itens**`,
+      fulfillResponse: {
+        status: 200,
+        body: {
+          cotacao: { id: stubs.cotacaoId, nome: stubs.cotacaoNome },
+          itens: [],
+          lotes: [],
+        },
+      },
+    })
+
+    await gotoEditarItemPage(page, stubs.cotacaoId, stubs.itemId)
+    await stubs.getItemCall
+
+    await log.step('Assert prefilled form and save')
+    await expect(page.getByTestId('editar-item-page')).toBeVisible()
+    await expect(page.getByTestId('editar-item-cotacao-nome')).toContainText(
+      stubs.cotacaoNome,
+      { timeout: 30_000 },
+    )
+    await expect(page.getByTestId('editar-item-nome')).toHaveValue(
+      stubs.itemNome,
+    )
+
+    await page.getByTestId('editar-item-nome').fill('Caneta E2E Editada')
+    await page.getByTestId('editar-item-submit').click()
+
+    const { status } = await editCall
+    expect(status).toBe(200)
+    await expect(page).toHaveURL(
+      new RegExp(`/v2/cotacao/cotacoes/detalhes/${stubs.cotacaoId}`),
+    )
+  })
+})
+
+test.describe('Importar itens — /v2/cotacao/cotacoes/detalhes/importar-itens/:id', () => {
+  test('[P0] importa planilha e volta aos detalhes', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub importar-itens APIs')
+    const stubs = await stubImportarItensPageApis(interceptNetworkCall)
+
+    const importCall = interceptNetworkCall({
+      method: 'POST',
+      url: `**/api/v2/cotacoes/importar-itens/${stubs.cotacaoId}**`,
+      fulfillResponse: {
+        status: 200,
+        body: {
+          success: true,
+          message: 'Itens importados com sucesso!',
+          erros_planilha: [],
+        },
+      },
+    })
+
+    await gotoImportarItensPage(page, stubs.cotacaoId)
+    await stubs.getItensCall
+
+    await log.step('Assert page and upload file')
+    await expect(page.getByTestId('importar-itens-page')).toBeVisible()
+    await expect(page.getByTestId('importar-itens-cotacao-nome')).toContainText(
+      stubs.cotacaoNome,
+      { timeout: 30_000 },
+    )
+    await expect(page.getByTestId('importar-itens-modelo')).toBeVisible()
+
+    await page.getByTestId('importar-itens-file').setInputFiles({
+      name: 'itens-e2e.xlsx',
+      mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      buffer: Buffer.from('PK\u0003\u0004e2e-xlsx'),
+    })
+    await maybeInjectTestIds(page, 'importar-itens')
+    await page.getByTestId('importar-itens-submit').click()
+
+    const { status } = await importCall
+    expect(status).toBe(200)
+    await expect(page).toHaveURL(
+      new RegExp(`/v2/cotacao/cotacoes/detalhes/${stubs.cotacaoId}`),
+    )
+  })
+})
+
+test.describe('Cotação IA — /v2/cotacao/cotacoes/detalhes/:id/ia', () => {
+  test('[P0] exibe gate quando módulo não contratado', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub IA sem módulo')
+    const stubs = await stubIaPageApis(interceptNetworkCall, {
+      moduleEnabled: false,
+    })
+
+    await gotoIaPage(page, stubs.cotacaoId)
+
+    await log.step('Assert no-access card')
+    await expect(page.getByTestId('ia-page')).toBeVisible()
+    await expect(
+      page.getByText(/Módulo Cotação com IA não contratado/i),
+    ).toBeVisible({ timeout: 30_000 })
+    await maybeInjectTestIds(page, 'ia')
+    await expect(page.getByTestId('ia-tenho-interesse')).toBeVisible()
+    await expect(page.getByTestId('ia-voltar')).toBeVisible()
+  })
+
+  test('[P0] carrega seleção de itens com módulo ativo', async ({
+    page,
+    interceptNetworkCall,
+  }) => {
+    await log.step('Stub IA com módulo')
+    const stubs = await stubIaPageApis(interceptNetworkCall, {
+      moduleEnabled: true,
+    })
+
+    await gotoIaPage(page, stubs.cotacaoId)
+    await stubs.getItensCall
+
+    await log.step('Assert IA select phase')
+    await expect(page.getByTestId('ia-page')).toBeVisible()
+    await maybeInjectTestIds(page, 'ia')
+    await expect(page.getByTestId('ia-titulo')).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByTestId('ia-cotacao-nome')).toContainText(
+      stubs.cotacaoNome,
+    )
+    await expect(page.getByTestId('ia-itens-panel')).toBeVisible()
+    await expect(page.getByText('Caneta Esferográfica Azul')).toBeVisible()
   })
 })

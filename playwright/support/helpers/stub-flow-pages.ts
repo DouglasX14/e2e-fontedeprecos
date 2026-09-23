@@ -1,6 +1,7 @@
 import type { Page, Route, Request } from '@playwright/test'
 import {
   buildDetalhesSessionUser,
+  buildGetItensResponse,
   buildGetPricesResponse,
   DETALHES_FIXTURE_IDS,
   ITEM_FIXTURE_IDS,
@@ -24,10 +25,16 @@ export const FLOW_FIXTURE_IDS = {
   LIST_COTACAO_ID: DETALHES_FIXTURE_IDS.COTACAO_ID,
 } as const
 
-async function stubCommonAuth(interceptNetworkCall: InterceptFn) {
+async function stubCommonAuth(
+  interceptNetworkCall: InterceptFn,
+  options: { sessionBody?: ReturnType<typeof buildDetalhesSessionUser> } = {},
+) {
   const sessionCall = interceptNetworkCall({
     url: '**/api/check-session**',
-    fulfillResponse: { status: 200, body: buildDetalhesSessionUser() },
+    fulfillResponse: {
+      status: 200,
+      body: options.sessionBody ?? buildDetalhesSessionUser(),
+    },
   })
   const permissionsCall = interceptNetworkCall({
     url: '**/api/permissions-config/**',
@@ -370,4 +377,219 @@ export async function stubListaCotacoesPageApis(
 export async function gotoListaCotacoesPage(page: Page) {
   await page.goto('/v2/cotacao/cotacoes', { timeout: 90_000 })
   await maybeInjectTestIds(page, 'lista')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/detalhes/editar-item/:id/:item_id`. */
+export async function stubEditarItemPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: {
+    cotacaoId?: string
+    itemId?: number
+    cotacaoNome?: string
+    itemNome?: string
+  } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const itemId = overrides.itemId ?? FLOW_FIXTURE_IDS.ITEM_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Editar Item'
+  const itemNome = overrides.itemNome ?? 'Caneta Esferográfica Azul'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  interceptNetworkCall({
+    url: '**/api/filtros**',
+    fulfillResponse: {
+      status: 200,
+      body: { ufs: [{ name: 'São Paulo', value: 'SP' }], bases_tabulares: [] },
+    },
+  })
+  interceptNetworkCall({
+    url: '**/api/v3/cotacao/cotacoes/unit**',
+    fulfillResponse: {
+      status: 200,
+      body: { units: [{ unidade: 'UN', descricao: 'Unidade' }] },
+    },
+  })
+  interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/lotes/**`,
+    fulfillResponse: {
+      status: 200,
+      body: [{ id: DETALHES_FIXTURE_IDS.LOTE_ID, nome: 'LOTE', ordem: 1 }],
+    },
+  })
+  interceptNetworkCall({
+    url: '**/api/modelos-de-justificativas**',
+    fulfillResponse: { status: 200, body: { modelos: [] } },
+  })
+
+  const itemBody = {
+    id: itemId,
+    nome: itemNome,
+    descricao: 'Descrição editável E2E',
+    quant: 10,
+    // Form matches units by descricao === res.unidade
+    unidade: 'Unidade',
+    uf: 'SP',
+    obs: '',
+    cotacao: { id: cotacaoId, nome: cotacaoNome },
+  }
+
+  const getItemCall = interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao-item/${itemId}`,
+    fulfillResponse: { status: 200, body: itemBody },
+  })
+  interceptNetworkCall({
+    method: 'GET',
+    url: `**/api/v3/cotacao-item/${itemId}/`,
+    fulfillResponse: { status: 200, body: itemBody },
+  })
+
+  return { cotacaoId, itemId, cotacaoNome, itemNome, getItemCall, ...auth }
+}
+
+export async function gotoEditarItemPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+  itemId = FLOW_FIXTURE_IDS.ITEM_ID,
+) {
+  await page.goto(
+    `/v2/cotacao/cotacoes/detalhes/editar-item/${cotacaoId}/${itemId}`,
+    { timeout: 90_000 },
+  )
+  await maybeInjectTestIds(page, 'editar-item')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/detalhes/importar-itens/:id`. */
+export async function stubImportarItensPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: { cotacaoId?: string; cotacaoNome?: string } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Importar Itens'
+  const auth = await stubCommonAuth(interceptNetworkCall)
+
+  const getItensBody = buildGetItensResponse({
+    cotacaoId,
+    cotacaoNome,
+  })
+
+  const getItensCall = interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/itens**`,
+    fulfillResponse: { status: 200, body: getItensBody },
+  })
+
+  // Single lote → lote select hidden (lotes.length > 1 gate)
+  interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/lotes**`,
+    fulfillResponse: {
+      status: 200,
+      body: [{ id: DETALHES_FIXTURE_IDS.LOTE_ID, nome: 'LOTE', ordem: 1 }],
+    },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: { bases_tabulares: [] } },
+  })
+
+  return { cotacaoId, cotacaoNome, getItensCall, getItensBody, ...auth }
+}
+
+export async function gotoImportarItensPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+) {
+  await page.goto(
+    `/v2/cotacao/cotacoes/detalhes/importar-itens/${cotacaoId}`,
+    { timeout: 90_000 },
+  )
+  await maybeInjectTestIds(page, 'importar-itens')
+}
+
+/** Stubs for `/v2/cotacao/cotacoes/detalhes/:id/ia`. */
+export async function stubIaPageApis(
+  interceptNetworkCall: InterceptFn,
+  overrides: {
+    cotacaoId?: string
+    cotacaoNome?: string
+    /** When false, page shows "módulo não contratado". Default true. */
+    moduleEnabled?: boolean
+  } = {},
+) {
+  const cotacaoId = overrides.cotacaoId ?? FLOW_FIXTURE_IDS.COTACAO_ID
+  const cotacaoNome = overrides.cotacaoNome ?? 'Cotação E2E Cotação IA'
+  const moduleEnabled = overrides.moduleEnabled ?? true
+  const auth = await stubCommonAuth(interceptNetworkCall, {
+    // User flag must be on to reach tenant permission check (valid-user-ia).
+    sessionBody: buildDetalhesSessionUser({
+      acesso_cotacao_ia: true,
+      equipe_fonte: false,
+    }),
+  })
+
+  interceptNetworkCall({
+    url: '**/api/v3/cotacao/valid-user-ia**',
+    fulfillResponse: {
+      status: 200,
+      body: { valid_user: moduleEnabled, module_enabled: moduleEnabled },
+    },
+  })
+
+  interceptNetworkCall({
+    url: '**/api/filtros/**',
+    fulfillResponse: { status: 200, body: buildExpressaFiltrosBody() },
+  })
+
+  const getItensBody = buildGetItensResponse({
+    cotacaoId,
+    cotacaoNome,
+    personalizada: false,
+  })
+
+  const getItensCall = interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/itens**`,
+    fulfillResponse: { status: 200, body: getItensBody },
+  })
+
+  interceptNetworkCall({
+    url: `**/api/v3/cotacao/${cotacaoId}/lotes/**`,
+    fulfillResponse: {
+      status: 200,
+      body: [{ id: DETALHES_FIXTURE_IDS.LOTE_ID, nome: 'LOTE', ordem: 1 }],
+    },
+  })
+
+  interceptNetworkCall({
+    url: `**/cotacao/cotacoes/${cotacaoId}/ia/uso**`,
+    fulfillResponse: {
+      status: 200,
+      body: {
+        restantes_usd: 50,
+        limite_mensal_usd: 100,
+        max_itens_com_saldo: 10,
+        custo_estimado_por_item_usd: 1,
+        saldo_esgotado: false,
+        dentro_vigencia: true,
+      },
+    },
+  })
+
+  return {
+    cotacaoId,
+    cotacaoNome,
+    moduleEnabled,
+    getItensCall,
+    getItensBody,
+    ...auth,
+  }
+}
+
+export async function gotoIaPage(
+  page: Page,
+  cotacaoId = FLOW_FIXTURE_IDS.COTACAO_ID,
+) {
+  await page.goto(`/v2/cotacao/cotacoes/detalhes/${cotacaoId}/ia`, {
+    timeout: 90_000,
+  })
+  await maybeInjectTestIds(page, 'ia')
 }
