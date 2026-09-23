@@ -4,6 +4,9 @@ import type {
   TestCase,
   TestResult,
 } from '@playwright/test/reporter'
+import fs from 'node:fs'
+import path from 'node:path'
+import { resolveHtmlReportDir } from '../report-dir'
 
 type Row = {
   title: string
@@ -19,10 +22,9 @@ type FinalEntry = {
 
 /**
  * Terminal summary in Portuguese: passed / failed / skipped with reasons.
- * Complements the default `list` + HTML reporters.
+ * Also writes test-results/qa-outcome.json for qa.sh (auto-open report).
  */
 class QaSummaryReporter implements Reporter {
-  /** Last attempt per test id (retries overwrite). */
   private finals = new Map<string, FinalEntry>()
 
   onTestEnd(test: TestCase, result: TestResult): void {
@@ -70,6 +72,18 @@ class QaSummaryReporter implements Reporter {
     }
 
     const total = passed + flaky + failed.length + skipped.length
+    const reportDir = resolveHtmlReportDir()
+
+    writeOutcome({
+      passed,
+      flaky,
+      failed: failed.length,
+      skipped: skipped.length,
+      total,
+      reportDir,
+      failedTitles: failed.map((r) => r.title),
+      skippedTitles: skipped.map((r) => r.title),
+    })
 
     console.log('')
     console.log('========== Resumo QA (e2e-fontedeprecos) ==========')
@@ -78,6 +92,7 @@ class QaSummaryReporter implements Reporter {
         (flaky ? `  ·  flaky: ${flaky}` : '') +
         `  ·  falhou: ${failed.length}  ·  pulado: ${skipped.length}`,
     )
+    console.log(`  Report: ${reportDir}/`)
 
     if (skipped.length > 0) {
       console.log('')
@@ -99,9 +114,7 @@ class QaSummaryReporter implements Reporter {
         if (row.hint) console.log(`      dica:    ${row.hint}`)
       }
       console.log('')
-      console.log(
-        '  Detalhe visual: yarn qa:report  (trace/screenshot por falha)',
-      )
+      console.log(`  Detalhe visual: yarn qa:report  (pasta ${reportDir})`)
     } else if (skipped.length > 0) {
       console.log('')
       console.log(
@@ -117,11 +130,24 @@ class QaSummaryReporter implements Reporter {
   }
 }
 
+function writeOutcome(payload: Record<string, unknown>): void {
+  try {
+    const dir = path.join(process.cwd(), 'test-results')
+    fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(
+      path.join(dir, 'qa-outcome.json'),
+      JSON.stringify(payload, null, 2),
+      'utf8',
+    )
+  } catch {
+    /* non-fatal */
+  }
+}
+
 function formatTitle(test: TestCase): string {
-  // titlePath usually starts with the project name; sometimes also the file.
   return test
     .titlePath()
-    .filter((p) => p !== 'chromium' && !/\.(spec\.)?tsx?$/i.test(p))
+    .filter((p) => Boolean(p) && p !== 'chromium' && !/\.(spec\.)?tsx?$/i.test(p))
     .join(' › ')
 }
 

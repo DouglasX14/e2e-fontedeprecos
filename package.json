@@ -11,7 +11,7 @@
     "qa:smoke": "bash scripts/qa.sh smoke",
     "qa:full": "bash scripts/qa.sh full",
     "qa:server": "bash scripts/qa.sh server",
-    "qa:report": "playwright show-report playwright-report",
+    "qa:report": "bash scripts/qa-report.sh",
     "test:e2e": "playwright test",
     "test:e2e:cotacao-v2": "playwright test playwright/e2e/cotacao-*.spec.ts",
     "test:e2e:cotacao-v2:stable": "playwright test playwright/e2e/cotacao-*.spec.ts --workers=1",

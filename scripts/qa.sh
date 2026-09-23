@@ -22,6 +22,16 @@ export INJECT_TESTIDS="${INJECT_TESTIDS:-1}"
 export PLAYWRIGHT_PORT="${PLAYWRIGHT_PORT:-3010}"
 export BASE_URL="${BASE_URL:-http://127.0.0.1:${PLAYWRIGHT_PORT}}"
 
+# Report HTML: DDMMAA-{tipo}-report  (ex.: 230926-qa-report)
+# full → qa (como no exemplo do time); smoke → smoke
+REPORT_KIND="qa"
+if [[ "$MODE" == "smoke" ]]; then
+  REPORT_KIND="smoke"
+fi
+DATE_TAG="$(date +%d%m%y)"
+export QA_REPORT_KIND="$REPORT_KIND"
+export PLAYWRIGHT_HTML_REPORT="${PLAYWRIGHT_HTML_REPORT:-${DATE_TAG}-${REPORT_KIND}-report}"
+
 # FRONTEND_DIR: env > ../frontend-fp > ../../frontend-fp
 if [[ -z "${FRONTEND_DIR:-}" ]]; then
   for candidate in \
@@ -39,6 +49,7 @@ echo "==> e2e-fontedeprecos QA ($MODE)"
 echo "    BASE_URL=$BASE_URL"
 echo "    INJECT_TESTIDS=$INJECT_TESTIDS"
 echo "    FRONTEND_DIR=${FRONTEND_DIR:-(não definido)}"
+echo "    REPORT=$PLAYWRIGHT_HTML_REPORT"
 
 # --- Node >= 18 ---
 if ! command -v node >/dev/null 2>&1; then
@@ -247,9 +258,59 @@ set -e
 echo ""
 echo "==> Exit code: $EXIT"
 
+# Persiste o nome do report para yarn qa:report
+printf '%s\n' "$PLAYWRIGHT_HTML_REPORT" >"$ROOT/.qa-last-report"
+
+OUTCOME="$ROOT/test-results/qa-outcome.json"
+FAILED_N=0
+SKIPPED_N=0
+if [[ -f "$OUTCOME" ]]; then
+  FAILED_N="$(node -e "const o=require('./test-results/qa-outcome.json'); process.stdout.write(String(o.failed||0))")"
+  SKIPPED_N="$(node -e "const o=require('./test-results/qa-outcome.json'); process.stdout.write(String(o.skipped||0))")"
+fi
+
+open_report_if_needed() {
+  # Em CI não abre browser.
+  if [[ "${CI:-}" == "1" ]]; then
+    return 0
+  fi
+  # Abre se falhou ou se houve skip (pedido do time).
+  if [[ "$FAILED_N" -gt 0 || "$SKIPPED_N" -gt 0 || "$EXIT" -ne 0 ]]; then
+    if [[ -f "$ROOT/$PLAYWRIGHT_HTML_REPORT/index.html" ]]; then
+      echo "==> Abrindo report HTML: $PLAYWRIGHT_HTML_REPORT"
+      # nohup+disown: sobrevive ao fim do script
+      nohup yarn playwright show-report "$PLAYWRIGHT_HTML_REPORT" \
+        >"$ROOT/.qa-report-serve.log" 2>&1 &
+      disown $! 2>/dev/null || true
+      echo "    (servindo em background; log: .qa-report-serve.log)"
+    else
+      echo "Aviso: report $PLAYWRIGHT_HTML_REPORT/index.html não encontrado."
+    fi
+  fi
+}
+
+pack_report_zip() {
+  local zip_path="$ROOT/${PLAYWRIGHT_HTML_REPORT}.zip"
+  if [[ ! -f "$ROOT/$PLAYWRIGHT_HTML_REPORT/index.html" ]]; then
+    echo "    Aviso: $PLAYWRIGHT_HTML_REPORT/index.html ausente — sem zip."
+    return 0
+  fi
+  rm -f "$zip_path" "${zip_path%.zip}.tgz"
+  if command -v zip >/dev/null 2>&1; then
+    (cd "$ROOT" && zip -qr "$zip_path" "$PLAYWRIGHT_HTML_REPORT")
+  else
+    (cd "$ROOT" && tar -czf "${zip_path%.zip}.tgz" "$PLAYWRIGHT_HTML_REPORT")
+    zip_path="${zip_path%.zip}.tgz"
+  fi
+  echo "    Report empacotado: $zip_path"
+  echo "    Envie este arquivo ao time (ou print do HTML)."
+}
+
+open_report_if_needed
+
 if [[ "$EXIT" -eq 0 ]]; then
   echo "    OK — suíte passou (resumo acima: passou / pulado / falhou)."
-  echo "    Relatório HTML: yarn qa:report"
+  echo "    Report: $PLAYWRIGHT_HTML_REPORT/  ·  reabrir: yarn qa:report"
   exit 0
 fi
 
@@ -266,19 +327,6 @@ echo "  App não sobe              →  yarn no frontend-fp; porta 3010 livre; v
 echo "  2 skipped (item-api)      →  normal sem RUN_LIVE_ITEM_API=1 (não é falha)"
 echo ""
 
-ZIP="$ROOT/playwright-report-qa.zip"
-if [[ -f "$ROOT/playwright-report/index.html" ]]; then
-  rm -f "$ZIP" "${ZIP%.zip}.tgz"
-  if command -v zip >/dev/null 2>&1; then
-    (cd "$ROOT" && zip -qr "$ZIP" playwright-report)
-  else
-    (cd "$ROOT" && tar -czf "${ZIP%.zip}.tgz" playwright-report)
-    ZIP="${ZIP%.zip}.tgz"
-  fi
-  echo "    Report empacotado: $ZIP"
-  echo "    Envie este arquivo ao time (ou print do HTML)."
-else
-  echo "    Aviso: playwright-report/index.html ausente — sem zip."
-fi
+pack_report_zip
 echo "    Abrir HTML local: yarn qa:report"
 exit "$EXIT"

@@ -6,10 +6,15 @@ node_modules/
 # Playwright
 /test-results/
 /playwright-report/
+/[0-9][0-9][0-9][0-9][0-9][0-9]-*-report/
+/.qa-last-report
 /playwright-report-qa.zip
 /playwright-report-qa.tgz
+/[0-9][0-9][0-9][0-9][0-9][0-9]-*-report.zip
+/[0-9][0-9][0-9][0-9][0-9][0-9]-*-report.tgz
 /blob-report/
 /.qa-nuxt.log
+/.qa-report-serve.log
 /playwright/.cache/
 /playwright/auth-sessions/*
 !/playwright/auth-sessions/.gitkeep

@@ -35,12 +35,13 @@ Front em outro path:
 FRONTEND_DIR=/caminho/absoluto/frontend-fp yarn qa:smoke
 ```
 
-4. Se falhar: o script gera `playwright-report-qa.zip` (só se houver HTML) — **envie esse zip**.  
-   Abrir HTML local: `yarn qa:report`.
+4. Se falhar **ou** houver testes pulados: o HTML report abre sozinho (pasta `DDMMAA-{tipo}-report`, ex. `230926-qa-report`).  
+   Reabrir depois: `yarn qa:report`. Em falha também gera o zip com o mesmo nome.
 
 O script aplica `INJECT_TESTIDS=1`, porta `3010` e `--workers=1` automaticamente.  
 Se o Nuxt não estiver no ar, o `qa` sobe ele uma vez (log em `.qa-nuxt.log`), pré-aquece todas as rotas da suíte e só então roda o Playwright; ao final, encerra o Nuxt.  
 No fim da execução aparece um **Resumo QA** em português (passou / falhou / pulado + motivo e dica).  
+O HTML report usa o nome `DDMMAA-{tipo}-report` (`yarn qa` → `230926-qa-report`, `yarn qa:smoke` → `230926-smoke-report`) e **abre sozinho** se houver falha ou skip.  
 Run oficial (exige pin): `STRICT_FRONTEND_PIN=1 yarn qa`.
 
 ### Rodar várias vezes seguidas (mais rápido)
@@ -117,7 +118,7 @@ yarn test:e2e:cotacao-v2:stable
 | `yarn qa` / `yarn qa:full` | Kit QA: install + Chromium + suíte cotação v2 (inject, workers=1) |
 | `yarn qa:smoke` | Kit QA rápido (detalhes core + item v2) |
 | `yarn qa:server` | Sobe o Nuxt na 3010, pré-aquece as rotas e fica no ar para os próximos `qa` |
-| `yarn qa:report` | Abre o HTML report (`playwright-report/`) |
+| `yarn qa:report` | Abre o último HTML report (`DDMMAA-{tipo}-report`) |
 | `yarn test:e2e` | Todos os specs em `playwright/e2e/` |
 | `yarn test:e2e:cotacao-v2` | Suíte `cotacao-*.spec.ts` |
 | `yarn test:e2e:cotacao-v2:stable` | Idem, `--workers=1` (recomendado local) |
@@ -206,7 +207,7 @@ TEST_USER_PASSWORD=secret
 
 ## Troubleshooting
 
-Para QA, ver também **Falhas comuns** no topo. Em falha, `yarn qa` gera `playwright-report-qa.zip`.
+Para QA, ver também **Falhas comuns** no topo. Em falha/skip o report abre sozinho; em falha o zip fica como `230926-qa-report.zip`.
 
 | Sintoma | Ação |
 |---------|------|

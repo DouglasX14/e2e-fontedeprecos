@@ -1,8 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
+import { resolveHtmlReportDir } from './playwright/support/report-dir'
 
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000'
 const PORT = Number(process.env.PLAYWRIGHT_PORT || 3000)
 const FRONTEND_DIR = process.env.FRONTEND_DIR
+const HTML_REPORT_DIR = resolveHtmlReportDir()
 
 export default defineConfig({
   testDir: './playwright/e2e',
@@ -15,7 +17,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: [
     ['list'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
+    ['html', { open: 'never', outputFolder: HTML_REPORT_DIR }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     ['./playwright/support/reporters/qa-summary-reporter.ts'],
   ],
